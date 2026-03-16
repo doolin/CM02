@@ -40,10 +40,8 @@ resource "aws_iam_role_policy_attachment" "cm02_basic_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-resource "aws_iam_role_policy_attachment" "cm02_artifacts_access" {
-  role       = aws_iam_role.cm02_lambda_role.name
-  policy_arn = aws_iam_policy.inventium_artifacts_lambda_access.arn
-}
+# S3 artifact policy attachment is managed in form-terra, where
+# the inventium-artifacts bucket and its IAM policy are defined.
 
 # ---------------------------------------------------------------------
 # Lambda function
@@ -133,7 +131,7 @@ resource "aws_iam_role" "github_deploy" {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
         }
         StringLike = {
-          "token.actions.githubusercontent.com:sub" = "repo:${var.github_org}/${var.github_repo}:ref:refs/heads/main"
+          "token.actions.githubusercontent.com:sub" = "repo:${var.github_org}/${var.github_repo}:ref:refs/heads/master"
         }
       }
     }]
