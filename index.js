@@ -5,15 +5,26 @@ const { uploadAndPresign } = require("./lib/s3Upload");
 
 const htmlPath = path.join(__dirname, "public", "index.html");
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
 exports.handler = async (event) => {
   const method = event.requestContext?.http?.method || event.httpMethod;
+
+  // Handle CORS preflight
+  if (method === "OPTIONS") {
+    return { statusCode: 204, headers: CORS_HEADERS, body: "" };
+  }
 
   // Serve the web form on GET
   if (method === "GET") {
     const html = fs.readFileSync(htmlPath, "utf8");
     return {
       statusCode: 200,
-      headers: { "Content-Type": "text/html" },
+      headers: { ...CORS_HEADERS, "Content-Type": "text/html" },
       body: html,
     };
   }
@@ -34,7 +45,7 @@ exports.handler = async (event) => {
 
   return {
     statusCode: 200,
-    headers: { "Content-Type": "application/json" },
+    headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     body: JSON.stringify({ pdf_url: url }),
   };
 };
