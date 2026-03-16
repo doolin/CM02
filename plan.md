@@ -14,22 +14,50 @@ to the `inventium-artifacts` S3 bucket, and returns a presigned URL.
 - **800-53A PDF** — not downloadable from this environment (403); assessment
   procedure content is already in the OSCAL JSON
 
-## PDF Form: 10-Line Table
+## PDF Layout — Mimics NIST SP 800-53A Format
 
-The generated PDF contains a table with 10 rows:
+The PDF mimics the format and style of the 800-53A publication, with an
+**extra rightmost column ("Response")** for data entry by the caller.
 
-| # | Field                     | Source                         |
-|---|---------------------------|--------------------------------|
-| 1 | Control ID                | `CM-02` (static)               |
-| 2 | Control Name              | `Baseline Configuration`       |
-| 3 | Control Family            | `Configuration Management`     |
-| 4 | System Name               | event input                    |
-| 5 | Implementation Status     | event input (enum)             |
-| 6 | Control Description       | OSCAL statement text           |
-| 7 | Implementation Narrative  | event input (free text)        |
-| 8 | Responsible Role          | event input                    |
-| 9 | Parameters (ODPs)         | event input (frequency, circumstances) |
-| 10| Assessment Objective      | OSCAL assessment objectives    |
+### Visual Layout (10-row table)
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  CM-02  BASELINE CONFIGURATION                                         │
+│  Configuration Management Family                                       │
+├──────────────────────────┬──────────────────────┬──────────────────────┤
+│  SECTION                 │  NIST TEXT            │  RESPONSE (input)    │
+├──────────────────────────┼──────────────────────┼──────────────────────┤
+│ 1. Control ID            │ CM-02                │                      │
+│ 2. Control Name          │ Baseline Config.     │                      │
+│ 3. System Name           │                      │ [from event]         │
+│ 4. Implementation Status │                      │ [from event: enum]   │
+│ 5. Control Statement     │ (a) Develop, doc...  │                      │
+│    (multi-line)          │ (b) Review and...    │                      │
+│ 6. Parameters (ODPs)     │ cm-02_odp.01: freq.  │ [from event]         │
+│                          │ cm-02_odp.02: circ.  │ [from event]         │
+│ 7. Impl. Narrative       │                      │ [from event: text]   │
+│ 8. Responsible Role      │                      │ [from event]         │
+│ 9. Assessment Objective  │ Determine if:        │                      │
+│    ("Determine if:")     │  cm-2_obj.a-1: ...   │                      │
+│                          │  cm-2_obj.a-2: ...   │                      │
+│                          │  cm-2_obj.b.1: ...   │                      │
+│                          │  cm-2_obj.b.2: ...   │                      │
+│                          │  cm-2_obj.b.3: ...   │                      │
+│ 10. Assessment Methods   │ EXAMINE: [list]      │                      │
+│                          │ INTERVIEW: [list]    │                      │
+│                          │ TEST: [list]         │                      │
+└──────────────────────────┴──────────────────────┴──────────────────────┘
+```
+
+### Style Notes (mimic 800-53A PDF)
+- **Font:** Times New Roman (or closest PDFKit equivalent: Times-Roman)
+- **Header row:** bold, dark background, white text — control ID + name
+- **Section labels:** left column, bold
+- **NIST text:** center column, regular weight, verbatim from OSCAL
+- **Response column:** rightmost, contains caller-supplied data entry values
+- **Assessment methods:** use bold sub-labels (Examine / Interview / Test)
+- **Border lines** between rows; gray alternating row shading
 
 ## Steps
 
@@ -57,8 +85,9 @@ Dev dependencies:
 ### 3. Create PDF generator (`lib/cm02Pdf.js`)
 - Read control text from `data/cm02-control.json`
 - Substitute ODP parameters with caller-provided values
-- Build 10-row table layout with PDFKit
-- Header with NIST branding / form title
+- Build 3-column, 10-row table mimicking 800-53A style
+- Columns: Section | NIST Text | Response
+- Header with control ID, name, family
 - Return PDF as a Buffer
 
 ### 4. Create S3 uploader (`lib/s3Upload.js`)
