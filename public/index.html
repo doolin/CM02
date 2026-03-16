@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CM-02 Baseline Configuration</title>
+  <style>
+    :root {
+      --navy: #1a3a5c;
+      --navy-light: #2a5a8c;
+      --gray-bg: #f5f6f8;
+      --gray-border: #d0d0d0;
+      --text: #333;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Times New Roman", Times, serif;
+      color: var(--text);
+      background: var(--gray-bg);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    header p {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .title-bar {
+      background: var(--navy);
+      color: #fff;
+      padding: 12px 16px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 4px 4px 0 0;
+    }
+
+    form {
+      background: #fff;
+      border: 1px solid var(--gray-border);
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+    }
+
+    .field {
+      padding: 16px;
+      border-bottom: 1px solid var(--gray-border);
+    }
+
+    .field:last-child {
+      border-bottom: none;
+    }
+
+    .field-number {
+      font-size: 0.75rem;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+      color: var(--navy);
+    }
+
+    .field-description {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      border: 1px solid var(--gray-border);
+      border-radius: 4px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--navy-light);
+      box-shadow: 0 0 0 2px rgba(26, 58, 92, 0.15);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .odp-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .odp-item label {
+      font-size: 0.85rem;
+      font-weight: normal;
+      color: var(--text);
+    }
+
+    .odp-item label strong {
+      color: var(--navy);
+    }
+
+    .actions {
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      border-top: 1px solid var(--gray-border);
+    }
+
+    button {
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 10px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid var(--gray-border);
+      background: #fff;
+      color: var(--text);
+    }
+
+    button[type="submit"] {
+      background: var(--navy);
+      color: #fff;
+      border-color: var(--navy);
+    }
+
+    button[type="submit"]:hover {
+      background: var(--navy-light);
+    }
+
+    button[type="submit"]:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    button[type="reset"]:hover {
+      background: var(--gray-bg);
+    }
+
+    .status-message {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .status-message.error {
+      display: block;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #991b1b;
+    }
+
+    .status-message.success {
+      display: block;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #166534;
+    }
+
+    .status-message a {
+      color: var(--navy);
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>NIST SP 800-53 Rev 5 / 800-53A Rev 5</h1>
+      <p>Configuration Management Family</p>
+    </header>
+
+    <div class="title-bar">CM-02 Baseline Configuration</div>
+
+    <form id="cm02-form">
+      <div class="field">
+        <div class="field-number">Row 1 &mdash; Control Number/Title</div>
+        <label for="systemName">System Name</label>
+        <p class="field-description">Name of the system being assessed.</p>
+        <input type="text" id="systemName" name="systemName" required
+               placeholder="e.g. ACME Corp Production System">
+      </div>
+
+      <div class="field">
+        <div class="field-number">Row 5 &mdash; Implementation Status</div>
+        <label for="implementationStatus">Implementation Status</label>
+        <select id="implementationStatus" name="implementationStatus" required>
+          <option value="" disabled selected>Select status&hellip;</option>
+          <option value="Implemented">Implemented</option>
+          <option value="Partially Implemented">Partially Implemented</option>
+          <option value="Planned">Planned</option>
+          <option value="Alternative">Alternative</option>
+          <option value="Not Applicable">Not Applicable</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="field-number">Row 6 &mdash; Organization-Defined Parameters</div>
+        <label>ODPs</label>
+        <p class="field-description">Values for the organization-defined parameters in CM-02.</p>
+        <div class="odp-group">
+          <div class="odp-item">
+            <label for="frequency"><strong>CM-02_ODP[01]:</strong> Frequency of baseline review and update</label>
+            <input type="text" id="frequency" name="frequency" required
+                   placeholder="e.g. annually and upon significant change">
+          </div>
+          <div class="odp-item">
+            <label for="circumstances"><strong>CM-02_ODP[02]:</strong> Circumstances requiring review and update</label>
+            <input type="text" id="circumstances" name="circumstances" required
+                   placeholder="e.g. security incidents, system upgrades">
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-number">Row 7 &mdash; Implementation Narrative</div>
+        <label for="implementationNarrative">Implementation Narrative</label>
+        <p class="field-description">Describe how CM-02 is implemented in your system.</p>
+        <textarea id="implementationNarrative" name="implementationNarrative" required
+                  placeholder="Describe the baseline configuration process, tools used, and how changes are controlled..."></textarea>
+      </div>
+
+      <div class="field">
+        <div class="field-number">Row 8 &mdash; Assessment Objective</div>
+        <label for="responsibleRole">Responsible Role</label>
+        <p class="field-description">Role accountable for maintaining the baseline configuration.</p>
+        <input type="text" id="responsibleRole" name="responsibleRole" required
+               placeholder="e.g. System Administrator / ISSO">
+      </div>
+
+      <div class="actions">
+        <button type="reset">Clear</button>
+        <button type="submit" id="submitBtn">Generate PDF</button>
+      </div>
+    </form>
+
+    <div id="statusMessage" class="status-message"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('cm02-form');
+    const statusEl = document.getElementById('statusMessage');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Configure your Lambda endpoint URL here
+    const API_ENDPOINT = window.CM02_API_ENDPOINT || '/api/cm02';
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      statusEl.className = 'status-message';
+      statusEl.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Generating\u2026';
+
+      const payload = {
+        systemName: form.systemName.value.trim(),
+        implementationStatus: form.implementationStatus.value,
+        frequency: form.frequency.value.trim(),
+        circumstances: form.circumstances.value.trim(),
+        implementationNarrative: form.implementationNarrative.value.trim(),
+        responsibleRole: form.responsibleRole.value.trim(),
+      };
+
+      try {
+        const res = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          throw new Error(`Server returned ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        if (data.pdf_url) {
+          statusEl.className = 'status-message success';
+          statusEl.innerHTML = 'PDF generated successfully. <a href="' +
+            data.pdf_url + '" target="_blank" rel="noopener">Download PDF</a>';
+        } else {
+          throw new Error('No PDF URL in response');
+        }
+      } catch (err) {
+        statusEl.className = 'status-message error';
+        statusEl.textContent = 'Error: ' + err.message;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Generate PDF';
+      }
+    });
+  </script>
+</body>
+</html>
