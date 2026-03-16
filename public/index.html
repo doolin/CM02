@@ -201,6 +201,93 @@
         color: var(--navy);
         font-weight: bold;
       }
+
+      /* PDF Preview */
+      .preview-section {
+        margin-top: 24px;
+      }
+
+      .preview-toggle {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 10px;
+        background: var(--navy);
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        cursor: pointer;
+        margin-bottom: 0;
+      }
+
+      .preview-toggle:hover {
+        background: var(--navy-light);
+      }
+
+      .preview-panel {
+        display: none;
+        background: #fff;
+        border: 1px solid var(--gray-border);
+        border-top: none;
+        border-radius: 0 0 4px 4px;
+        overflow: hidden;
+      }
+
+      .preview-panel.open {
+        display: block;
+      }
+
+      .preview-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8rem;
+        line-height: 1.4;
+      }
+
+      .preview-table th,
+      .preview-table td {
+        border: 1px solid var(--gray-border);
+        padding: 6px 8px;
+        vertical-align: top;
+        text-align: left;
+      }
+
+      .preview-table thead th {
+        background: var(--navy);
+        color: #fff;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .preview-table tbody tr:nth-child(even) {
+        background: #f9fafb;
+      }
+
+      .preview-table .row-label {
+        font-weight: bold;
+        white-space: nowrap;
+        width: 15%;
+        color: var(--navy);
+      }
+
+      .preview-table .nist-text {
+        width: 45%;
+        color: #555;
+        font-style: italic;
+      }
+
+      .preview-table .response-text {
+        width: 40%;
+        color: var(--text);
+      }
+
+      .preview-empty {
+        color: #999;
+        font-style: italic;
+      }
     </style>
   </head>
   <body>
@@ -317,6 +404,24 @@
       </form>
 
       <div id="statusMessage" class="status-message"></div>
+
+      <div class="preview-section">
+        <button type="button" class="preview-toggle" id="previewToggle">
+          Show PDF Preview
+        </button>
+        <div class="preview-panel" id="previewPanel">
+          <table class="preview-table">
+            <thead>
+              <tr>
+                <th>Section</th>
+                <th>NIST Text</th>
+                <th>Response</th>
+              </tr>
+            </thead>
+            <tbody id="previewBody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <script>
@@ -326,6 +431,117 @@
 
       // Configure your Lambda endpoint URL here
       const API_ENDPOINT = window.CM02_API_ENDPOINT || "/api/cm02";
+
+      // --- PDF Preview ---
+      const previewToggle = document.getElementById("previewToggle");
+      const previewPanel = document.getElementById("previewPanel");
+      const previewBody = document.getElementById("previewBody");
+
+      previewToggle.addEventListener("click", () => {
+        const open = previewPanel.classList.toggle("open");
+        previewToggle.textContent = open
+          ? "Hide PDF Preview"
+          : "Show PDF Preview";
+        if (open) updatePreview();
+      });
+
+      const NIST_ROWS = [
+        {
+          label: "Control Number / Title",
+          nist: "CM-02 Baseline Configuration",
+          field: "systemName",
+          prefix: "System: ",
+        },
+        {
+          label: "Control Text",
+          nist: "a. Develop, document, and maintain a current baseline configuration of the information system; b. Review and update the baseline configuration of the information system [frequency] [circumstances].",
+          field: null,
+        },
+        {
+          label: "Discussion",
+          nist: "Baseline configurations for information systems and system components include connectivity, operational, and communications aspects of systems.",
+          field: null,
+        },
+        {
+          label: "Related Controls",
+          nist: "AC-19, AU-6, CA-9, CM-1, CM-3, CM-5, CM-6, CM-8, CM-9, CP-9, CP-10, CP-12, MA-2, PL-8, PM-5, SA-10, SA-15, SC-18",
+          field: null,
+        },
+        {
+          label: "Implementation Status",
+          nist: "Select one: Implemented | Partially Implemented | Planned | Alternative | Not Applicable",
+          field: "implementationStatus",
+        },
+        {
+          label: "ODPs",
+          nist: "CM-02_ODP[01]: frequency; CM-02_ODP[02]: circumstances requiring review",
+          fields: ["frequency", "circumstances"],
+        },
+        {
+          label: "Implementation Narrative",
+          nist: "Describe how this control is implemented in the system.",
+          field: "implementationNarrative",
+        },
+        {
+          label: "Assessment Objective",
+          nist: "Determine if baseline configuration is developed, documented, maintained, reviewed, and updated per policy.",
+          field: "responsibleRole",
+          prefix: "Responsible: ",
+        },
+        {
+          label: "Examine",
+          nist: "[SELECT FROM: configuration management policy; procedures; baseline configuration; system design documentation; system architecture; change control records]",
+          field: null,
+        },
+        {
+          label: "Interview & Test",
+          nist: "[SELECT FROM: personnel with configuration management responsibilities] [SELECT FROM: automated mechanisms implementing baseline configuration]",
+          field: null,
+        },
+      ];
+
+      function esc(str) {
+        const d = document.createElement("div");
+        d.textContent = str;
+        return d.innerHTML;
+      }
+
+      function updatePreview() {
+        if (!previewPanel.classList.contains("open")) return;
+        const rows = NIST_ROWS.map((row) => {
+          let response = "";
+          if (row.fields) {
+            response = row.fields
+              .map((f) => form[f]?.value?.trim() || "")
+              .filter(Boolean)
+              .join("; ");
+          } else if (row.field) {
+            const val = form[row.field]?.value?.trim() || "";
+            response = val ? (row.prefix || "") + val : "";
+          }
+          const responseHtml = response
+            ? esc(response)
+            : '<span class="preview-empty">—</span>';
+          return (
+            "<tr>" +
+            '<td class="row-label">' +
+            esc(row.label) +
+            "</td>" +
+            '<td class="nist-text">' +
+            esc(row.nist) +
+            "</td>" +
+            '<td class="response-text">' +
+            responseHtml +
+            "</td>" +
+            "</tr>"
+          );
+        });
+        previewBody.innerHTML = rows.join("");
+      }
+
+      // Update preview on any input change
+      form.addEventListener("input", updatePreview);
+      form.addEventListener("change", updatePreview);
 
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
