@@ -28,6 +28,25 @@ The form collects the following from the user:
 - **Implementation Narrative** — free-text description of how CM-02 is implemented
 - **Responsible Role** — role accountable for the control
 
+## CI/CD
+
+GitHub Actions runs on every push/PR to `main`:
+
+1. **Test** — `npm ci && npm test` (Node 20)
+2. **Deploy** (main only) — zips the Lambda, uploads via `aws lambda
+   update-function-code`, runs a smoke test invocation
+
+Lambda infrastructure (function, API Gateway, IAM role) is managed in
+[form-terra](https://github.com/daviddoolin/form-terra). The web form
+is served from the same Lambda via API Gateway.
+
+### Required GitHub Secrets
+
+| Secret                   | Description                                    |
+|--------------------------|------------------------------------------------|
+| `AWS_DEPLOY_ROLE_ARN`    | IAM role ARN for OIDC-based GitHub Actions auth |
+| `LAMBDA_FUNCTION_NAME`   | Name of the CM-02 Lambda function               |
+
 ## PDF artifact storage (inventium-artifacts bucket)
 
 CM02 generates PDFs and serves them to unauthenticated users via
