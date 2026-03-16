@@ -13,14 +13,40 @@ describe("handler", () => {
     uploadAndPresign.mockClear();
   });
 
-  test("returns 200 with pdf_url", async () => {
+  test("serves HTML form on GET", async () => {
     const event = {
-      systemName: "My System",
-      implementationStatus: "Implemented",
-      implementationNarrative: "We do the thing.",
-      responsibleRole: "ISSO",
-      frequency: "annually",
-      circumstances: "major changes",
+      requestContext: { http: { method: "GET" } },
+    };
+
+    const result = await handler(event);
+
+    expect(result.statusCode).toBe(200);
+    expect(result.headers["Content-Type"]).toBe("text/html");
+    expect(result.body).toContain("cm02-form");
+  });
+
+  test("serves HTML form on GET (REST API format)", async () => {
+    const event = {
+      httpMethod: "GET",
+    };
+
+    const result = await handler(event);
+
+    expect(result.statusCode).toBe(200);
+    expect(result.headers["Content-Type"]).toBe("text/html");
+  });
+
+  test("returns 200 with pdf_url on POST", async () => {
+    const event = {
+      requestContext: { http: { method: "POST" } },
+      body: JSON.stringify({
+        systemName: "My System",
+        implementationStatus: "Implemented",
+        implementationNarrative: "We do the thing.",
+        responsibleRole: "ISSO",
+        frequency: "annually",
+        circumstances: "major changes",
+      }),
     };
 
     const result = await handler(event);
@@ -34,12 +60,14 @@ describe("handler", () => {
     expect(pdfArg.subarray(0, 5).toString()).toBe("%PDF-");
   });
 
-  test("handles JSON string body (API Gateway proxy)", async () => {
+  test("handles direct event payload (no httpMethod)", async () => {
     const event = {
-      body: JSON.stringify({
-        systemName: "Proxy System",
-        implementationStatus: "Planned",
-      }),
+      systemName: "Direct System",
+      implementationStatus: "Planned",
+      implementationNarrative: "Planning phase.",
+      responsibleRole: "Admin",
+      frequency: "annually",
+      circumstances: "changes",
     };
 
     const result = await handler(event);
