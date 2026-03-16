@@ -89,6 +89,60 @@ describe("handler", () => {
     expect(result.headers["Access-Control-Allow-Origin"]).toBe("*");
   });
 
+  test("returns 405 for unsupported methods", async () => {
+    const event = {
+      requestContext: { http: { method: "DELETE" } },
+    };
+
+    const result = await handler(event);
+    expect(result.statusCode).toBe(405);
+  });
+
+  test("returns 400 for invalid JSON body", async () => {
+    const event = {
+      requestContext: { http: { method: "POST" } },
+      body: "not json{{{",
+    };
+
+    const result = await handler(event);
+    expect(result.statusCode).toBe(400);
+    const body = JSON.parse(result.body);
+    expect(body.error).toContain("Invalid JSON");
+  });
+
+  test("returns 400 for validation errors", async () => {
+    const event = {
+      requestContext: { http: { method: "POST" } },
+      body: JSON.stringify({ systemName: "" }),
+    };
+
+    const result = await handler(event);
+    expect(result.statusCode).toBe(400);
+    const body = JSON.parse(result.body);
+    expect(body.errors.length).toBeGreaterThan(0);
+  });
+
+  test("returns 500 on unexpected error", async () => {
+    uploadAndPresign.mockRejectedValueOnce(new Error("S3 down"));
+
+    const event = {
+      requestContext: { http: { method: "POST" } },
+      body: JSON.stringify({
+        systemName: "Test",
+        implementationStatus: "Implemented",
+        implementationNarrative: "Test.",
+        responsibleRole: "Admin",
+        frequency: "annually",
+        circumstances: "changes",
+      }),
+    };
+
+    const result = await handler(event);
+    expect(result.statusCode).toBe(500);
+    const body = JSON.parse(result.body);
+    expect(body.error).toBe("Internal server error");
+  });
+
   test("handles direct event payload (no httpMethod)", async () => {
     const event = {
       systemName: "Direct System",
