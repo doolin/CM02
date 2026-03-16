@@ -85,13 +85,33 @@ exports.handler = async (event) => {
     // Upload and return presigned URL
     const { url } = await uploadAndPresign(pdfBuffer);
 
+    // Audit log for CloudWatch
+    console.log(
+      JSON.stringify({
+        event: "pdf_generated",
+        control: "CM-02",
+        systemName: input.systemName,
+        implementationStatus: input.implementationStatus,
+        sourceIp,
+        pdfSizeBytes: pdfBuffer.length,
+        timestamp: new Date().toISOString(),
+      }),
+    );
+
     return {
       statusCode: 200,
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
       body: JSON.stringify({ pdf_url: url }),
     };
   } catch (err) {
-    console.error("Lambda error:", err);
+    console.error(
+      JSON.stringify({
+        event: "lambda_error",
+        error: err.message,
+        stack: err.stack,
+        timestamp: new Date().toISOString(),
+      }),
+    );
     return errorResponse(500, "Internal server error");
   }
 };
