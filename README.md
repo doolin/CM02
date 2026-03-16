@@ -34,7 +34,7 @@ GitHub Actions runs on every push/PR to `main`:
 
 1. **Test** — `npm ci && npm test` (Node 20)
 2. **Deploy** (main only) — zips the Lambda, uploads via `aws lambda
-   update-function-code`, runs a smoke test invocation
+update-function-code`, runs a smoke test invocation
 
 Lambda infrastructure (function, API Gateway, IAM role) is managed in
 [form-terra](https://github.com/daviddoolin/form-terra). The web form
@@ -42,10 +42,10 @@ is served from the same Lambda via API Gateway.
 
 ### Required GitHub Secrets
 
-| Secret                   | Description                                    |
-|--------------------------|------------------------------------------------|
-| `AWS_DEPLOY_ROLE_ARN`    | IAM role ARN for OIDC-based GitHub Actions auth |
-| `LAMBDA_FUNCTION_NAME`   | Name of the CM-02 Lambda function               |
+| Secret                 | Description                                     |
+| ---------------------- | ----------------------------------------------- |
+| `AWS_DEPLOY_ROLE_ARN`  | IAM role ARN for OIDC-based GitHub Actions auth |
+| `LAMBDA_FUNCTION_NAME` | Name of the CM-02 Lambda function               |
 
 ## PDF artifact storage (inventium-artifacts bucket)
 
@@ -79,15 +79,12 @@ resource "aws_iam_role_policy_attachment" "cm02_artifacts_access" {
 }
 ```
 
-
 ### How to write a PDF and serve it
 
 The pattern is: write the PDF to S3, generate a presigned GET URL,
 return the URL to the caller. The caller (a random unauthenticated
 user) opens the URL directly in their browser — S3 serves the file
 with no further Lambda involvement.
-
-
 
 ```
 require 'aws-sdk-s3'
@@ -116,5 +113,3 @@ url = signer.presigned_url(
 # 3. Return it
 { statusCode: 200, body: JSON.generate({ pdf_url: url }) }
 ```
-
-
