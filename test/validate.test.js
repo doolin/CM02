@@ -56,4 +56,37 @@ describe("validate", () => {
     const errors = validate({});
     expect(errors.length).toBeGreaterThanOrEqual(6);
   });
+
+  test("accepts field at exactly MAX_FIELD_LENGTH", () => {
+    const errors = validate({
+      ...validInput,
+      systemName: "x".repeat(500),
+    });
+    expect(errors).toEqual([]);
+  });
+
+  test("rejects field at MAX_FIELD_LENGTH + 1", () => {
+    const errors = validate({
+      ...validInput,
+      systemName: "x".repeat(501),
+    });
+    expect(errors[0]).toContain("500 characters");
+  });
+
+  test("accepts narrative at exactly MAX_NARRATIVE_LENGTH", () => {
+    const errors = validate({
+      ...validInput,
+      implementationNarrative: "x".repeat(5000),
+    });
+    expect(errors).toEqual([]);
+  });
+
+  test("length check uses trimmed value", () => {
+    // 499 real chars + leading/trailing spaces = over 500 raw but under 500 trimmed
+    const errors = validate({
+      ...validInput,
+      systemName: "  " + "x".repeat(499) + "  ",
+    });
+    expect(errors).toEqual([]);
+  });
 });

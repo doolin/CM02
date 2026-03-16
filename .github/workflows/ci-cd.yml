@@ -74,8 +74,9 @@ jobs:
         run: |
           aws lambda invoke \
             --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
-            --payload '{"systemName":"CI smoke test","implementationStatus":"Planned","frequency":"annually","circumstances":"CI test","implementationNarrative":"Automated CI test","responsibleRole":"CI"}' \
+            --payload '{"httpMethod":"POST","body":"{\"systemName\":\"CI smoke test\",\"implementationStatus\":\"Planned\",\"frequency\":\"annually\",\"circumstances\":\"CI test\",\"implementationNarrative\":\"Automated CI test\",\"responsibleRole\":\"CI\"}"}' \
             --cli-binary-format raw-in-base64-out \
             /tmp/response.json
           cat /tmp/response.json
-          grep -q '"pdf_url"' /tmp/response.json
+          BODY=$(jq -r '.body' /tmp/response.json)
+          echo "$BODY" | jq -e '.pdf_url'

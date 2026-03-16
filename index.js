@@ -72,14 +72,14 @@ exports.handler = async (event) => {
       };
     }
 
-    // Generate PDF
+    // Generate PDF (trim all free-text inputs)
     const pdfBuffer = await generatePdf({
-      systemName: input.systemName,
+      systemName: input.systemName.trim(),
       implementationStatus: input.implementationStatus,
-      implementationNarrative: input.implementationNarrative,
-      responsibleRole: input.responsibleRole,
-      frequency: input.frequency,
-      circumstances: input.circumstances,
+      implementationNarrative: input.implementationNarrative.trim(),
+      responsibleRole: input.responsibleRole.trim(),
+      frequency: input.frequency.trim(),
+      circumstances: input.circumstances.trim(),
     });
 
     // Upload and return presigned URL

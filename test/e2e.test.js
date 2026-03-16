@@ -86,6 +86,12 @@ describe("E2E", () => {
     const body = JSON.parse(result.body);
     expect(body.errors).toBeDefined();
     expect(body.errors).toHaveLength(6);
+    expect(body.errors).toContain("systemName is required");
+    expect(body.errors).toContain("implementationStatus is required");
+    expect(body.errors).toContain("frequency is required");
+    expect(body.errors).toContain("circumstances is required");
+    expect(body.errors).toContain("implementationNarrative is required");
+    expect(body.errors).toContain("responsibleRole is required");
     expect(uploadAndPresign).not.toHaveBeenCalled();
   });
 
