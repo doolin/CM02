@@ -2,6 +2,32 @@
 
 ## For Claude
 
+## How it works
+
+A user fills out a web form with their system-specific values for the
+NIST SP 800-53 Rev 5 CM-02 (Baseline Configuration) control. The form
+submits to an AWS Lambda, which generates a PDF that mirrors the layout
+of the NIST SP 800-53A Rev 5 assessment procedure — with the user's
+responses filled into a rightmost "Response" column. The Lambda uploads
+the PDF to S3 and returns a presigned URL so the user can download it
+immediately.
+
+```
+Web Form  →  Lambda  →  PDF (PDFKit)  →  S3  →  Presigned URL  →  User
+```
+
+### Web form fields
+
+The form collects the following from the user:
+
+- **System Name** — name of the system being assessed
+- **Implementation Status** — Implemented | Partially Implemented | Planned | Alternative | Not Applicable
+- **Organization-Defined Parameters (ODPs)**
+  - Frequency of baseline review/update (CM-02_ODP[01])
+  - Circumstances requiring review/update (CM-02_ODP[02])
+- **Implementation Narrative** — free-text description of how CM-02 is implemented
+- **Responsible Role** — role accountable for the control
+
 ## PDF artifact storage (inventium-artifacts bucket)
 
 CM02 generates PDFs and serves them to unauthenticated users via

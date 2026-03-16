@@ -5,99 +5,101 @@ Create a Node.js AWS Lambda that generates a filled-out PDF form for the
 NIST SP 800-53 Rev 5 CM-02 (Baseline Configuration) control, uploads it
 to the `inventium-artifacts` S3 bucket, and returns a presigned URL.
 
+## Flow
+```
+Web Form  →  Lambda  →  PDF (PDFKit)  →  S3  →  Presigned URL  →  User
+```
+
 ## Data Sources
-- **OSCAL JSON catalog** — downloaded to `data/NIST_SP-800-53_rev5_catalog.json` (10MB)
-  - Source: [usnistgov/oscal-content](https://github.com/usnistgov/oscal-content)
+- **OSCAL JSON catalog** — `data/NIST_SP-800-53_rev5_catalog.json`
   - Includes both 800-53 Rev 5 controls AND 800-53A Rev 5 assessment procedures
-- **CM-02 extract** — `data/cm02-control.json` (full OSCAL object) and
-  `data/cm02-verbatim.txt` (human-readable text)
-- **800-53A PDF** — not downloadable from this environment (403); assessment
-  procedure content is already in the OSCAL JSON
+- **CM-02 extract** — `data/cm02-control.json` (full OSCAL object)
 
-## PDF Layout — Mimics NIST SP 800-53A Format
+## PDF Layout — Matches NIST SP 800-53A Rev 5
 
-The PDF mimics the format and style of the 800-53A publication, with an
-**extra rightmost column ("Response")** for data entry by the caller.
+The PDF mirrors the sections of an 800-53A assessment procedure entry,
+with an extra rightmost **"Response"** column for user-provided values.
 
-### Visual Layout (10-row table)
+### 10-Row Table (matching 800-53A structure)
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│  CM-02  BASELINE CONFIGURATION                                         │
-│  Configuration Management Family                                       │
-├──────────────────────────┬──────────────────────┬──────────────────────┤
-│  SECTION                 │  NIST TEXT            │  RESPONSE (input)    │
-├──────────────────────────┼──────────────────────┼──────────────────────┤
-│ 1. Control ID            │ CM-02                │                      │
-│ 2. Control Name          │ Baseline Config.     │                      │
-│ 3. System Name           │                      │ [from event]         │
-│ 4. Implementation Status │                      │ [from event: enum]   │
-│ 5. Control Statement     │ (a) Develop, doc...  │                      │
-│    (multi-line)          │ (b) Review and...    │                      │
-│ 6. Parameters (ODPs)     │ cm-02_odp.01: freq.  │ [from event]         │
-│                          │ cm-02_odp.02: circ.  │ [from event]         │
-│ 7. Impl. Narrative       │                      │ [from event: text]   │
-│ 8. Responsible Role      │                      │ [from event]         │
-│ 9. Assessment Objective  │ Determine if:        │                      │
-│    ("Determine if:")     │  cm-2_obj.a-1: ...   │                      │
-│                          │  cm-2_obj.a-2: ...   │                      │
-│                          │  cm-2_obj.b.1: ...   │                      │
-│                          │  cm-2_obj.b.2: ...   │                      │
-│                          │  cm-2_obj.b.3: ...   │                      │
-│ 10. Assessment Methods   │ EXAMINE: [list]      │                      │
-│                          │ INTERVIEW: [list]    │                      │
-│                          │ TEST: [list]         │                      │
-└──────────────────────────┴──────────────────────┴──────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│  CM-02  BASELINE CONFIGURATION                                   │
+├──────────────────┬─────────────────────┬─────────────────────────┤
+│  SECTION         │  NIST TEXT          │  RESPONSE               │
+├──────────────────┼─────────────────────┼─────────────────────────┤
+│ 1. Control       │ CM-02 Baseline      │ [system name from form] │
+│    Number/Title  │ Configuration       │                         │
+├──────────────────┼─────────────────────┼─────────────────────────┤
+│ 2. Control Text  │ a. Develop, doc...  │                         │
+│                  │ b. Review and...    │                         │
+│                  │    1. [frequency]   │                         │
+│                  │    2. [circum.]     │                         │
+│                  │    3. When...       │                         │
+├──────────────────┼─────────────────────┼─────────────────────────┤
+│ 3. Discussion    │ Baseline configs    │                         │
+│                  │ for systems and...  │                         │
+├──────────────────┼─────────────────────┼─────────────────────────┤
+│ 4. Related       │ AC-19, AU-6, CA-9,  │                         │
+│    Controls      │ CM-1, CM-3, CM-5... │                         │
+├──────────────────┼─────────────────────┼─────────────────────────┤
+│ 5. Impl. Status  │                     │ [status from form]      │
+├──────────────────┼─────────────────────┼─────────────────────────┤
+│ 6. ODPs          │ ODP[01]: frequency  │ [frequency from form]   │
+│                  │ ODP[02]: circum.    │ [circumstances]         │
+├──────────────────┼─────────────────────┼─────────────────────────┤
+│ 7. Impl.         │                     │ [narrative from form]   │
+│    Narrative     │                     │                         │
+├──────────────────┼─────────────────────┼─────────────────────────┤
+│ 8. Assessment    │ Determine if:       │ [responsible role       │
+│    Objective     │  a-1: ...           │  from form]             │
+│                  │  a-2: ...           │                         │
+│                  │  b.1–b.3: ...       │                         │
+├──────────────────┼─────────────────────┼─────────────────────────┤
+│ 9. Examine       │ [SELECT FROM:       │                         │
+│                  │  CM policy; ...]    │                         │
+├──────────────────┼─────────────────────┼─────────────────────────┤
+│ 10. Interview    │ [SELECT FROM:       │                         │
+│     & Test       │  Personnel ...]     │                         │
+│                  │ TEST: [SELECT FROM: │                         │
+│                  │  Processes ...]     │                         │
+└──────────────────┴─────────────────────┴─────────────────────────┘
 ```
 
-### Style Notes (mimic 800-53A PDF)
-- **Font:** Times New Roman (or closest PDFKit equivalent: Times-Roman)
-- **Header row:** bold, dark background, white text — control ID + name
+### Row mapping to 800-53A sections
+
+| Row | 800-53A Section              | NIST Text col                    | Response col                |
+|-----|------------------------------|----------------------------------|-----------------------------|
+| 1   | Control Number & Title       | CM-02 Baseline Configuration     | System name (from form)     |
+| 2   | Control Text                 | Statement with substituted ODPs  |                             |
+| 3   | Discussion                   | Guidance prose                   |                             |
+| 4   | Related Controls             | AC-19, AU-6, CA-9, CM-1, etc.   |                             |
+| 5   | Implementation Status        |                                  | Status (from form)          |
+| 6   | Organization-Defined Params  | ODP labels                       | ODP values (from form)      |
+| 7   | Implementation Narrative     |                                  | Narrative (from form)       |
+| 8   | Assessment Objective         | "Determine if:" + statements     | Responsible role (from form)|
+| 9   | Examine                      | [SELECT FROM: artifacts list]    |                             |
+| 10  | Interview & Test             | Interview + Test lists           |                             |
+
+### Style (mimic 800-53A PDF)
+- **Font:** Times-Roman (PDFKit built-in)
+- **Header:** bold, dark blue background, white text
 - **Section labels:** left column, bold
-- **NIST text:** center column, regular weight, verbatim from OSCAL
-- **Response column:** rightmost, contains caller-supplied data entry values
-- **Assessment methods:** use bold sub-labels (Examine / Interview / Test)
-- **Border lines** between rows; gray alternating row shading
+- **NIST text:** center column, verbatim from OSCAL
+- **Response column:** rightmost, user-supplied values
+- **Borders** between rows; alternating gray row shading
 
 ## Steps
 
-### 1. Initialize Node.js project (`package.json`)
-Dependencies:
-- `pdfkit` — PDF generation (pure JS, no native deps, Lambda-friendly)
-- `@aws-sdk/client-s3` — S3 upload
-- `@aws-sdk/s3-request-presigner` — presigned URLs
+### 1. Update PDF generator (`lib/cm02Pdf.js`)
+- Restructure to the 10 rows above
+- Add Discussion (guidance) row
+- Add Related Controls row
+- Split Examine and Interview/Test into separate rows
+- Move Responsible Role into Assessment Objective response column
 
-Dev dependencies:
-- `jest` — testing
+### 2. Update handler and tests
 
-### 2. Create the Lambda handler (`index.js`)
-- Accept event payload with CM-02 field values:
-  - `systemName` (string)
-  - `implementationStatus` (enum: Implemented | Partially Implemented | Planned | Alternative | Not Applicable)
-  - `implementationNarrative` (string, free text)
-  - `responsibleRole` (string)
-  - `frequency` (string — fills ODP cm-02_odp.01)
-  - `circumstances` (string — fills ODP cm-02_odp.02)
-- Fall back to sensible defaults when fields are omitted
-- Entry point: `exports.handler = async (event) => { ... }`
-- Orchestrate: generate PDF → upload to S3 → return presigned URL
+### 3. Update README (done)
 
-### 3. Create PDF generator (`lib/cm02Pdf.js`)
-- Read control text from `data/cm02-control.json`
-- Substitute ODP parameters with caller-provided values
-- Build 3-column, 10-row table mimicking 800-53A style
-- Columns: Section | NIST Text | Response
-- Header with control ID, name, family
-- Return PDF as a Buffer
-
-### 4. Create S3 uploader (`lib/s3Upload.js`)
-- Write PDF bytes to `inventium-artifacts` under key `cm02/<uuid>.pdf`
-- Generate 30-minute presigned GET URL
-- Return the URL (follows the pattern documented in README)
-
-### 5. Add tests (`test/`)
-- Unit test for PDF generation (verify output is valid PDF buffer)
-- Unit test for handler (mock S3, verify response shape)
-- Verify ODP substitution works correctly
-
-### 6. Commit and push to `claude/read-readme-ew7mv`
+### 4. Commit and push to `claude/read-readme-ew7mv`
