@@ -1,0 +1,29 @@
+Control ID: CM-02
+Control Name: Baseline Configuration
+Family: Configuration Management (CM)
+
+=== PARAMETERS ===
+cm-02_odp.01: [frequency] - organization-defined frequency for baseline review/update
+cm-02_odp.02: [circumstances] - organization-defined circumstances requiring review/update
+
+=== CONTROL STATEMENT ===
+a. Develop, document, and maintain under configuration control, a current baseline configuration of the system; and
+b. Review and update the baseline configuration of the system:
+   1. {{ insert: param, cm-02_odp.01 }};
+   2. When required due to {{ insert: param, cm-02_odp.02 }} ; and
+   3. When system components are installed or upgraded.
+
+=== GUIDANCE ===
+Baseline configurations for systems and system components include connectivity, operational, and communications aspects of systems. Baseline configurations are documented, formally reviewed, and agreed-upon specifications for systems or configuration items within those systems. Baseline configurations serve as a basis for future builds, releases, or changes to systems and include security and privacy control implementations, operational procedures, information about system components, network topology, and logical placement of components in the system architecture. Maintaining baseline configurations requires creating new baselines as organizational systems change over time. Baseline configurations of systems reflect the current enterprise architecture.
+
+=== ASSESSMENT OBJECTIVES ===
+cm-2_obj.a-1: a current baseline configuration of the system is developed and documented;
+cm-2_obj.a-2: a current baseline configuration of the system is maintained under configuration control;
+cm-2_obj.b.1: the baseline configuration of the system is reviewed and updated {{ insert: param, cm-02_odp.01 }};
+cm-2_obj.b.2: the baseline configuration of the system is reviewed and updated when required due to {{ insert: param, cm-02_odp.02 }};
+cm-2_obj.b.3: the baseline configuration of the system is reviewed and updated when system components are installed or upgraded.
+
+=== ASSESSMENT METHODS ===
+EXAMINE: Configuration management policy; procedures addressing the baseline configuration of the system; configuration management plan; enterprise architecture documentation; system design documentation; system security plan; privacy plan; system architecture and configuration documentation; system configuration settings and associated documentation; system component inventory; change control records; other relevant documents or records
+INTERVIEW: Organizational personnel with configuration management responsibilities; organizational personnel with information security and privacy responsibilities; system/network administrators
+TEST: Organizational processes for managing baseline configurations; mechanisms supporting configuration control of the baseline configuration
