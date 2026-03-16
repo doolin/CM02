@@ -60,6 +60,35 @@ describe("handler", () => {
     expect(pdfArg.subarray(0, 5).toString()).toBe("%PDF-");
   });
 
+  test("handles CORS preflight OPTIONS", async () => {
+    const event = {
+      requestContext: { http: { method: "OPTIONS" } },
+    };
+
+    const result = await handler(event);
+
+    expect(result.statusCode).toBe(204);
+    expect(result.headers["Access-Control-Allow-Origin"]).toBe("*");
+    expect(result.headers["Access-Control-Allow-Methods"]).toContain("POST");
+  });
+
+  test("includes CORS headers on POST response", async () => {
+    const event = {
+      requestContext: { http: { method: "POST" } },
+      body: JSON.stringify({
+        systemName: "CORS Test",
+        implementationStatus: "Planned",
+        implementationNarrative: "Test.",
+        responsibleRole: "Admin",
+        frequency: "annually",
+        circumstances: "changes",
+      }),
+    };
+
+    const result = await handler(event);
+    expect(result.headers["Access-Control-Allow-Origin"]).toBe("*");
+  });
+
   test("handles direct event payload (no httpMethod)", async () => {
     const event = {
       systemName: "Direct System",
