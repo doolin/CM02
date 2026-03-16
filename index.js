@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { generatePdf } = require("./lib/cm02Pdf");
 const { uploadAndPresign } = require("./lib/s3Upload");
+const { validate } = require("./lib/validate");
 
 const htmlPath = path.join(__dirname, "public", "index.html");
 
@@ -31,6 +32,15 @@ exports.handler = async (event) => {
 
   // Generate PDF on POST
   const input = typeof event.body === "string" ? JSON.parse(event.body) : event;
+
+  const errors = validate(input);
+  if (errors.length > 0) {
+    return {
+      statusCode: 400,
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      body: JSON.stringify({ errors }),
+    };
+  }
 
   const pdfBuffer = await generatePdf({
     systemName: input.systemName,
