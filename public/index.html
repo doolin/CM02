@@ -432,6 +432,66 @@
       // Configure your Lambda endpoint URL here
       const API_ENDPOINT = window.CM02_API_ENDPOINT || "/api/cm02";
 
+      // --- localStorage Draft Save/Load ---
+      const DRAFT_KEY = "cm02-draft";
+      const DRAFT_FIELDS = [
+        "systemName",
+        "implementationStatus",
+        "frequency",
+        "circumstances",
+        "implementationNarrative",
+        "responsibleRole",
+      ];
+
+      function saveDraft() {
+        const draft = {};
+        DRAFT_FIELDS.forEach((f) => {
+          draft[f] = form[f]?.value || "";
+        });
+        try {
+          localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+        } catch {
+          // localStorage unavailable or full — silently ignore
+        }
+      }
+
+      function loadDraft() {
+        try {
+          const raw = localStorage.getItem(DRAFT_KEY);
+          if (!raw) return;
+          const draft = JSON.parse(raw);
+          DRAFT_FIELDS.forEach((f) => {
+            if (draft[f] && form[f]) {
+              form[f].value = draft[f];
+            }
+          });
+        } catch {
+          // corrupted or unavailable — silently ignore
+        }
+      }
+
+      function clearDraft() {
+        try {
+          localStorage.removeItem(DRAFT_KEY);
+        } catch {
+          // silently ignore
+        }
+      }
+
+      // Load saved draft on page load
+      loadDraft();
+
+      // Auto-save on any input change
+      form.addEventListener("input", saveDraft);
+      form.addEventListener("change", saveDraft);
+
+      // Clear draft when form is reset
+      form.addEventListener("reset", () => {
+        clearDraft();
+        // Delay preview update so form values clear first
+        setTimeout(updatePreview, 0);
+      });
+
       // --- PDF Preview ---
       const previewToggle = document.getElementById("previewToggle");
       const previewPanel = document.getElementById("previewPanel");
