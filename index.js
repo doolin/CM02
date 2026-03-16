@@ -3,6 +3,7 @@ const path = require("path");
 const { generatePdf } = require("./lib/cm02Pdf");
 const { uploadAndPresign } = require("./lib/s3Upload");
 const { validate } = require("./lib/validate");
+const { checkRateLimit } = require("./lib/rateLimit");
 
 const htmlPath = path.join(__dirname, "public", "index.html");
 
@@ -42,6 +43,15 @@ exports.handler = async (event) => {
     // Only POST is allowed for PDF generation
     if (method && method !== "POST") {
       return errorResponse(405, `Method ${method} not allowed`);
+    }
+
+    // Rate limit POST requests
+    const sourceIp =
+      event.requestContext?.http?.sourceIp ||
+      event.requestContext?.identity?.sourceIp ||
+      "unknown";
+    if (!checkRateLimit(sourceIp)) {
+      return errorResponse(429, "Too many requests. Try again in a minute.");
     }
 
     // Parse body
