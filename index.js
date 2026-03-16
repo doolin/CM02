@@ -1,8 +1,8 @@
-const { generatePdf } = require('./lib/cm02Pdf');
-const { uploadAndPresign } = require('./lib/s3Upload');
+const { generatePdf } = require("./lib/cm02Pdf");
+const { uploadAndPresign } = require("./lib/s3Upload");
 
 exports.handler = async (event) => {
-  const input = typeof event.body === 'string' ? JSON.parse(event.body) : event;
+  const input = typeof event.body === "string" ? JSON.parse(event.body) : event;
 
   const pdfBuffer = await generatePdf({
     systemName: input.systemName,
