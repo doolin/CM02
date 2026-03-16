@@ -47,6 +47,172 @@ is served from the same Lambda via API Gateway.
 | `AWS_DEPLOY_ROLE_ARN`  | IAM role ARN for OIDC-based GitHub Actions auth |
 | `LAMBDA_FUNCTION_NAME` | Name of the CM-02 Lambda function               |
 
+## Setting up a similar Lambda project (with mobile browser access)
+
+This section walks through setting up a new Node.js Lambda that serves
+both an HTML form and an API endpoint, accessible from an iPhone browser.
+
+### 1. Create the Lambda function
+
+```bash
+aws lambda create-function \
+  --function-name my-form-lambda \
+  --runtime nodejs20.x \
+  --handler index.handler \
+  --role arn:aws:iam::ACCOUNT_ID:role/my-lambda-role \
+  --region us-west-1 \
+  --zip-file fileb://deployment.zip
+```
+
+### 2. Create an API Gateway (HTTP API)
+
+An HTTP API gives you a public URL that works in any browser, including
+mobile Safari on iPhone.
+
+```bash
+# Create the HTTP API
+aws apigatewayv2 create-api \
+  --name my-form-api \
+  --protocol-type HTTP \
+  --target arn:aws:lambda:us-west-1:ACCOUNT_ID:function:my-form-lambda
+
+# The output includes an ApiEndpoint like:
+# https://abc123def.execute-api.us-west-1.amazonaws.com
+```
+
+This creates a `$default` stage with auto-deploy. The endpoint URL
+works immediately in any browser.
+
+### 3. Add Lambda permission for API Gateway
+
+```bash
+aws lambda add-permission \
+  --function-name my-form-lambda \
+  --statement-id apigateway-access \
+  --action lambda:InvokeFunction \
+  --principal apigateway.amazonaws.com \
+  --source-arn "arn:aws:execute-api:us-west-1:ACCOUNT_ID:API_ID/*"
+```
+
+### 4. Structure the handler to serve both HTML and API
+
+The Lambda needs to handle two types of requests: GET (serve the form)
+and POST (process the form and return results).
+
+```javascript
+const fs = require("fs");
+const path = require("path");
+
+exports.handler = async (event) => {
+  // Serve the HTML form on GET
+  if (event.requestContext?.http?.method === "GET") {
+    const html = fs.readFileSync(
+      path.join(__dirname, "public", "index.html"),
+      "utf8",
+    );
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "text/html" },
+      body: html,
+    };
+  }
+
+  // Process the form on POST
+  const input = typeof event.body === "string" ? JSON.parse(event.body) : event;
+
+  // ... your logic here ...
+
+  return {
+    statusCode: 200,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ result: "ok" }),
+  };
+};
+```
+
+### 5. Configure routes (optional, for cleaner URLs)
+
+By default the HTTP API sends all requests to the Lambda. If you want
+separate paths:
+
+```bash
+# Create a GET /  route for the form
+aws apigatewayv2 create-route \
+  --api-id API_ID \
+  --route-key "GET /"
+
+# Create a POST /api route for form submission
+aws apigatewayv2 create-route \
+  --api-id API_ID \
+  --route-key "POST /api"
+```
+
+### 6. Set the API endpoint in the web form
+
+In `public/index.html`, point the form at the API Gateway URL:
+
+```html
+<script>
+  // Use relative path if form is served from same API Gateway
+  window.CM02_API_ENDPOINT = "/api/cm02";
+
+  // Or use the full URL if hosted separately
+  // window.CM02_API_ENDPOINT = "https://abc123def.execute-api.us-west-1.amazonaws.com/api/cm02";
+</script>
+```
+
+### 7. Deploy and test from iPhone
+
+```bash
+# Package
+zip -r deployment.zip index.js lib/ data/cm02-control.json public/ node_modules/ \
+  -x "*.test.js" "data/NIST_SP-800-53_rev5_catalog.json"
+
+# Deploy
+aws lambda update-function-code \
+  --function-name my-form-lambda \
+  --zip-file fileb://deployment.zip \
+  --publish
+```
+
+Open the API Gateway URL in Safari on your iPhone:
+`https://abc123def.execute-api.us-west-1.amazonaws.com`
+
+### 8. Optional: custom domain
+
+To use a friendly URL instead of the API Gateway default:
+
+1. Register a domain or use an existing one in Route 53
+2. Request an ACM certificate in `us-east-1` (required for API Gateway)
+3. Add a custom domain to the API:
+
+```bash
+aws apigatewayv2 create-domain-name \
+  --domain-name forms.example.com \
+  --domain-name-configurations \
+    CertificateArn=arn:aws:acm:us-east-1:ACCOUNT_ID:certificate/CERT_ID
+
+aws apigatewayv2 create-api-mapping \
+  --api-id API_ID \
+  --domain-name forms.example.com \
+  --stage '$default'
+```
+
+4. Add a CNAME or alias record in Route 53 pointing to the API Gateway
+   domain name.
+
+### Terraform alternative
+
+If you prefer infrastructure-as-code, define all of the above in
+form-terra. See the existing `inventium-artifacts.tf` for the pattern.
+The key Terraform resources are:
+
+- `aws_lambda_function`
+- `aws_apigatewayv2_api` (protocol_type = "HTTP")
+- `aws_apigatewayv2_integration` (Lambda proxy)
+- `aws_apigatewayv2_route` (GET / and POST /api)
+- `aws_lambda_permission` (allow API Gateway to invoke)
+
 ## PDF artifact storage (inventium-artifacts bucket)
 
 CM02 generates PDFs and serves them to unauthenticated users via
