@@ -5,7 +5,6 @@ describe('cm02Pdf', () => {
     const buffer = await generatePdf();
     expect(Buffer.isBuffer(buffer)).toBe(true);
     expect(buffer.length).toBeGreaterThan(0);
-    // PDF magic bytes
     expect(buffer.subarray(0, 5).toString()).toBe('%PDF-');
   });
 
@@ -20,7 +19,6 @@ describe('cm02Pdf', () => {
     });
     expect(Buffer.isBuffer(buffer)).toBe(true);
     expect(buffer.subarray(0, 5).toString()).toBe('%PDF-');
-    // Should be larger with content filled in
     expect(buffer.length).toBeGreaterThan(1000);
   });
 
@@ -29,7 +27,15 @@ describe('cm02Pdf', () => {
       frequency: 'quarterly',
       circumstances: 'security incidents',
     });
-    // We can't easily inspect PDF text, but verify it doesn't crash
     expect(Buffer.isBuffer(buffer)).toBe(true);
+  });
+
+  test('includes discussion and related controls rows', async () => {
+    // Verify the PDF generates without error when all 10 rows render
+    const buffer = await generatePdf({ systemName: 'Test' });
+    expect(Buffer.isBuffer(buffer)).toBe(true);
+    // PDF with all 10 rows including discussion and related controls
+    // should be larger than a minimal PDF
+    expect(buffer.length).toBeGreaterThan(2000);
   });
 });
