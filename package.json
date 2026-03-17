@@ -4,6 +4,7 @@
   "description": "Lambda for generating NIST SP 800-53 Rev 5 CM-02 Baseline Configuration PDF forms",
   "main": "index.js",
   "scripts": {
+    "start": "node serve.js",
     "test": "jest",
     "format:check": "prettier --check .",
     "format": "prettier --write ."
