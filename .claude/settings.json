@@ -7,7 +7,9 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Read(//Users/daviddoolin/src/slacronym/**)",
       "Read(//Users/daviddoolin/src/retirement/**)",
-      "Read(//Users/daviddoolin/src/vietnam-war-compendium/this-day/**)"
+      "Read(//Users/daviddoolin/src/vietnam-war-compendium/this-day/**)",
+      "Bash(grep -E \"\\\\.js$|\\\\.sh$|\\\\.ts$\")",
+      "Bash(xargs cat:*)"
     ]
   }
 }
