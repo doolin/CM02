@@ -14,6 +14,23 @@ immediately.
 Web Form  →  Lambda  →  PDF (PDFKit)  →  S3  →  Presigned URL  →  User
 ```
 
+## Run on localhost
+
+```bash
+npm install
+npm start
+```
+
+Then open:
+
+`http://localhost:3000`
+
+Notes:
+
+- If port 3000 is busy, the server automatically tries the next available port.
+- You can force a specific port with `PORT=3005 npm start`.
+- Generated PDFs are written to the `output/` directory and returned as localhost URLs.
+
 ### Web form fields
 
 The form is a 10-row table (Section | NIST Text | Response) matching

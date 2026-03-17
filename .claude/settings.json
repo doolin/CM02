@@ -3,7 +3,11 @@
     "allow": [
       "Bash(curl -s http://localhost:3002/output/cm02-1773705259757.pdf)",
       "Bash(curl -s -X POST http://localhost:3002/api/cm02 -H \"Content-Type: application/json\" -d '{}')",
-      "Bash(kill %1)"
+      "Bash(kill %1)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Read(//Users/daviddoolin/src/slacronym/**)",
+      "Read(//Users/daviddoolin/src/retirement/**)",
+      "Read(//Users/daviddoolin/src/vietnam-war-compendium/this-day/**)"
     ]
   }
 }

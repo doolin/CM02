@@ -7,7 +7,9 @@ const { generatePdf } = require("./lib/cm02Pdf");
 const { validate } = require("./lib/validate");
 const { checkRateLimit } = require("./lib/rateLimit");
 
-const PORT = process.env.PORT || 3002;
+const DEFAULT_PORT = 3000;
+const START_PORT = Number(process.env.PORT) || DEFAULT_PORT;
+const MAX_PORT_ATTEMPTS = 10;
 const OUTPUT_DIR = path.join(__dirname, "output");
 
 if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR);
@@ -99,7 +101,8 @@ const server = http.createServer(async (req, res) => {
       const filePath = path.join(OUTPUT_DIR, filename);
       fs.writeFileSync(filePath, pdfBuffer);
 
-      const url = `http://localhost:${PORT}/output/${filename}`;
+      const host = req.headers.host || `localhost:${START_PORT}`;
+      const url = `http://${host}/output/${filename}`;
       console.log(`PDF generated: ${filePath} (${pdfBuffer.length} bytes)`);
 
       res.writeHead(200, { "Content-Type": "application/json" });
@@ -115,15 +118,26 @@ const server = http.createServer(async (req, res) => {
   res.end(JSON.stringify({ error: `Method ${req.method} not allowed` }));
 });
 
-server.listen(PORT, () => {
-  console.log(`CM-02 local server: http://localhost:${PORT}`);
-});
+function listenWithFallback(port, attempt = 1) {
+  server.once("error", (err) => {
+    if (err.code === "EADDRINUSE" && !process.env.PORT && attempt < MAX_PORT_ATTEMPTS) {
+      const nextPort = port + 1;
+      console.warn(`Port ${port} is in use. Retrying on ${nextPort}...`);
+      listenWithFallback(nextPort, attempt + 1);
+      return;
+    }
 
-server.on("error", (err) => {
-  if (err.code === "EADDRINUSE") {
-    console.error(`Port ${PORT} is in use. Try: PORT=<number> npm start`);
-  } else {
-    console.error(err);
-  }
-  process.exit(1);
-});
+    if (err.code === "EADDRINUSE" && process.env.PORT) {
+      console.error(`Port ${port} is in use. Try another PORT value.`);
+    } else {
+      console.error(err);
+    }
+    process.exit(1);
+  });
+
+  server.listen(port, () => {
+    console.log(`CM-02 local server: http://localhost:${port}`);
+  });
+}
+
+listenWithFallback(START_PORT);
