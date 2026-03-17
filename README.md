@@ -1,7 +1,5 @@
 # Compliance
 
-## For Claude
-
 ## How it works
 
 A user fills out a web form with their system-specific values for the
@@ -18,15 +16,21 @@ Web Form  →  Lambda  →  PDF (PDFKit)  →  S3  →  Presigned URL  →  User
 
 ### Web form fields
 
-The form collects the following from the user:
+The form is a 10-row table (Section | NIST Text | Response) matching
+the 800-53A assessment layout. Required fields are marked with *.
 
-- **System Name** — name of the system being assessed
-- **Implementation Status** — Implemented | Partially Implemented | Planned | Alternative | Not Applicable
-- **Organization-Defined Parameters (ODPs)**
+- **System Name** * — name of the system being assessed
+- **Control Text Response** — how the system addresses each sub-requirement
+- **Discussion Response** — what baselines cover and where they are stored
+- **Related Controls Response** — which related controls are most relevant
+- **Implementation Status** * — Implemented | Partially Implemented | Planned | Alternative | Not Applicable
+- **Organization-Defined Parameters** *
   - Frequency of baseline review/update (CM-02_ODP[01])
   - Circumstances requiring review/update (CM-02_ODP[02])
-- **Implementation Narrative** — free-text description of how CM-02 is implemented
-- **Responsible Role** — role accountable for the control
+- **Implementation Narrative** * — free-text description of how CM-02 is implemented
+- **Responsible Role** * — role accountable for the control
+- **Examine Response** — specific artifacts/evidence for the system
+- **Interview & Test Response** — interviewees and test procedures
 
 ### Example: Federal Information System
 
@@ -55,7 +59,12 @@ FISMA Moderate baseline.
   "frequency": "annually and when directed by the Authorizing Official (AO)",
   "circumstances": "security incidents, changes to federal mandates (OMB, CISA BODs, NIST updates), system architecture changes, or software/hardware end-of-life events",
   "implementationNarrative": "The FMS baseline configuration is documented in the Configuration Management Plan (CMP) and maintained in an agency-approved CMDB. Baselines are established for operating systems (Windows Server 2022, RHEL 9), network devices (Cisco IOS-XE), and database servers (Oracle 19c) using DISA STIGs and CIS Benchmarks. Changes are processed through the agency CCB and tracked in ServiceNow. Automated compliance scans (SCAP/Nessus) run weekly to detect drift from approved baselines. All baseline documents are version-controlled and reviewed annually by the ISSO and system owner.",
-  "responsibleRole": "Information System Security Officer (ISSO)"
+  "responsibleRole": "Information System Security Officer (ISSO)",
+  "controlTextResponse": "(A) Baseline documented in CMP v4.2 and maintained in ServiceNow CMDB under change control. (B.1) Annual review completed 2025-09-15 by ISSO. (B.2) Ad-hoc reviews triggered per ODP circumstances. (B.3) Component baselines updated at each CCB-approved install/upgrade.",
+  "discussionResponse": "FMS baselines cover OS hardening (DISA STIGs), network device configs (Cisco IOS-XE), database parameters (Oracle 19c), and application middleware. Baselines are stored in the CMDB with full version history and tied to the SSP Appendix M.",
+  "relatedControlsResponse": "CM-1 (CMP), CM-3 (CCB change process), CM-6 (STIG/CIS settings), CM-8 (CMDB inventory), SA-10 (developer config mgmt) are the primary related controls for FMS.",
+  "examineResponse": "Configuration Management Plan (CMP) v4.2; SSP Appendix M; CMDB baseline export (ServiceNow); SCAP scan results (Nessus, weekly); CCB meeting minutes and change records; DISA STIG checklists for Windows Server 2022, RHEL 9, Oracle 19c; network device running-config backups.",
+  "interviewTestResponse": "INTERVIEW: ISSO (J. Martinez), CM Lead (R. Nguyen), Senior Network Admin (T. Brooks). TEST: Execute SCAP benchmark scan against server baseline; verify CMDB accuracy against live inventory; validate CCB workflow in ServiceNow produces audit trail; confirm drift alerts trigger within 24h."
 }
 ```
 
@@ -64,7 +73,7 @@ FISMA Moderate baseline.
 GitHub Actions runs on every push/PR to `master`:
 
 1. **Test** — `npm ci && npm test` (Node 20)
-2. **Deploy** (main only) — zips the Lambda, uploads via `aws lambda
+2. **Deploy** (master only) — zips the Lambda, uploads via `aws lambda
 update-function-code`, runs a smoke test invocation
 
 Lambda infrastructure (function, API Gateway, IAM role) is managed in
@@ -107,6 +116,7 @@ resources directly.
 
 ```bash
 npm install
+npm start         # local server at http://localhost:3002
 npm test          # run all tests
 npm run format    # auto-format with prettier
 ```
@@ -117,18 +127,6 @@ CM02 generates PDFs and serves them to unauthenticated users via
 presigned S3 URLs. The backing infrastructure lives in the
 [form-terra](https://github.com/daviddoolin/form-terra) Terraform
 repository — CM02 does not create or manage the bucket itself.
-
-### What form-terra provides
-
-The Terraform file `inventium-artifacts.tf` in form-terra creates:
-
-- **S3 bucket** named `inventium-artifacts` in `us-west-1`
-- **All public access blocked** (all four `aws_s3_bucket_public_access_block` settings are `true`) — there is no way to access objects via a plain S3 URL
-- **SSL-only bucket policy** — denies any request over plain HTTP
-- **Server-side encryption** with SSE-S3 (`AES256`)
-- **Versioning** enabled
-- **Lifecycle rule** that deletes all objects after **24 hours**
-- **IAM policy** named `inventium-artifacts-lambda-access` granting `s3:PutObject` and `s3:GetObject` on the bucket contents — nothing else (no delete, list, or admin actions)
 
 ### How CM02 gets access
 
@@ -146,34 +144,31 @@ resource "aws_iam_role_policy_attachment" "cm02_artifacts_access" {
 ### How to write a PDF and serve it
 
 The pattern is: write the PDF to S3, generate a presigned GET URL,
-return the URL to the caller. The caller (a random unauthenticated
-user) opens the URL directly in their browser — S3 serves the file
-with no further Lambda involvement.
+return the URL to the caller. See `lib/s3Upload.js` for the full
+implementation.
 
-```
-require 'aws-sdk-s3'
-require 'securerandom'
+```javascript
+const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const { randomUUID } = require("crypto");
 
-# 1. Write the PDF
-s3  = Aws::S3::Client.new
-key = "cm02/#{SecureRandom.uuid}.pdf"
+const s3 = new S3Client();
+const key = `cm02/${randomUUID()}.pdf`;
 
-s3.put_object(
-  bucket:       'inventium-artifacts',
-  key:          key,
-  body:         pdf_content,
-  content_type: 'application/pdf'
-)
+// 1. Write the PDF
+await s3.send(new PutObjectCommand({
+  Bucket: "inventium-artifacts",
+  Key: key,
+  Body: pdfBuffer,
+  ContentType: "application/pdf",
+}));
 
-# 2. Generate a presigned URL (30-minute expiration)
-signer = Aws::S3::Presigner.new
-url = signer.presigned_url(
-  :get_object,
-  bucket:     'inventium-artifacts',
-  key:        key,
-  expires_in: 1800  # 30 minutes
-)
+// 2. Generate a presigned URL (30-minute expiration)
+const url = await getSignedUrl(s3, new GetObjectCommand({
+  Bucket: "inventium-artifacts",
+  Key: key,
+}), { expiresIn: 1800 });
 
-# 3. Return it
-{ statusCode: 200, body: JSON.generate({ pdf_url: url }) }
+// 3. Return it
+return { statusCode: 200, body: JSON.stringify({ pdf_url: url }) };
 ```
