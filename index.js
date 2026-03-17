@@ -80,6 +80,11 @@ exports.handler = async (event) => {
       responsibleRole: input.responsibleRole.trim(),
       frequency: input.frequency.trim(),
       circumstances: input.circumstances.trim(),
+      controlTextResponse: (input.controlTextResponse || "").trim(),
+      discussionResponse: (input.discussionResponse || "").trim(),
+      relatedControlsResponse: (input.relatedControlsResponse || "").trim(),
+      examineResponse: (input.examineResponse || "").trim(),
+      interviewTestResponse: (input.interviewTestResponse || "").trim(),
     });
 
     // Upload and return presigned URL

@@ -88,6 +88,11 @@ const server = http.createServer(async (req, res) => {
         responsibleRole: input.responsibleRole.trim(),
         frequency: input.frequency.trim(),
         circumstances: input.circumstances.trim(),
+        controlTextResponse: (input.controlTextResponse || "").trim(),
+        discussionResponse: (input.discussionResponse || "").trim(),
+        relatedControlsResponse: (input.relatedControlsResponse || "").trim(),
+        examineResponse: (input.examineResponse || "").trim(),
+        interviewTestResponse: (input.interviewTestResponse || "").trim(),
       });
 
       const filename = `cm02-${Date.now()}.pdf`;
