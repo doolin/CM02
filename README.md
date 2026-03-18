@@ -67,6 +67,19 @@ FISMA Moderate baseline.
 | Interview | \[SELECT FROM: organizational personnel with configuration management responsibilities; organizational personnel with information security and privacy responsibilities; system/network administrators\] | ISSO (J. Martinez), CM Lead (R. Nguyen), Senior Network Admin (T. Brooks). |
 | Test | \[SELECT FROM: organizational processes for managing baseline configurations; mechanisms supporting configuration control of the baseline configuration\] | Execute SCAP benchmark scan against server baseline; verify CMDB accuracy against live inventory; validate CCB workflow in ServiceNow produces audit trail; confirm drift alerts trigger within 24h. |
 
+#### CM-02(02) Automation Support for Accuracy and Currency
+
+| Section | NIST Text | Response |
+| --- | --- | --- |
+| CM-02(02)_ODP | automated mechanisms for maintaining baseline configuration of the system are defined; | |
+| CM-02(02)[01] | the currency of the baseline configuration of the system is maintained using \<CM-02(02)_ODP automated mechanisms\>; | |
+| CM-02(02)[02] | the completeness of the baseline configuration of the system is maintained using \<CM-02(02)_ODP automated mechanisms\>; | |
+| CM-02(02)[03] | the accuracy of the baseline configuration of the system is maintained using \<CM-02(02)_ODP automated mechanisms\>; | |
+| CM-02(02)[04] | the availability of the baseline configuration of the system is maintained using \<CM-02(02)_ODP automated mechanisms\>. | |
+| CM-02(02)-Examine | \[SELECT FROM: configuration management policy; procedures addressing the baseline configuration of the system; configuration management plan; system design documentation; system architecture and configuration documentation; system configuration settings and associated documentation; system component inventory; configuration change control records; system security plan; other relevant documents or records\] | |
+| CM-02(02)-Interview | \[SELECT FROM: organizational personnel with configuration management responsibilities; organizational personnel with information security responsibilities; system/network administrators\] | |
+| CM-02(02)-Test | \[SELECT FROM: organizational processes for managing baseline configurations; automated mechanisms implementing baseline configuration maintenance\] | |
+
 ### Example event payload (JSON)
 
 ```json
