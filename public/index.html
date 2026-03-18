@@ -285,210 +285,136 @@
           <span>Response</span>
         </div>
 
-        <!-- Row 1: Control Number/Title -->
+        <!-- Row 1: CM-02_ODP[01] -->
         <div class="table-row">
-          <div class="cell cell-section">1. Control<br />Number/Title</div>
-          <div class="cell cell-nist">CM-02<br />Baseline Configuration</div>
+          <div class="cell cell-section">CM-02_ODP[01]</div>
+          <div class="cell cell-nist">the frequency of baseline configuration review and update is defined;</div>
           <div class="cell cell-response">
-            <div class="hint">System being assessed</div>
-            <input
-              type="text"
-              id="systemName"
-              name="systemName"
-              required
-              placeholder="e.g. DOJ Financial Management System (FMS)"
-            />
-          </div>
-        </div>
-
-        <!-- Row 2: Control Text -->
-        <div class="table-row">
-          <div class="cell cell-section">2. Control Text</div>
-          <div class="cell cell-nist">
-            (A) Develop, document, and maintain under configuration control, a
-            current baseline configuration of the system; and (B) Review and
-            update the baseline configuration of the system: (B.1)
-            [frequency]; (B.2) When required due to [circumstances]; and
-            (B.3) When system components are installed or upgraded.
-          </div>
-          <div class="cell cell-response">
-            <div class="hint">
-              How your system addresses each sub-requirement (optional)
-            </div>
-            <textarea
-              id="controlTextResponse"
-              name="controlTextResponse"
-              placeholder="e.g. (A) Baseline documented in CMP v4.2 and maintained in CMDB under change control..."
-            ></textarea>
-          </div>
-        </div>
-
-        <!-- Row 3: Discussion -->
-        <div class="table-row">
-          <div class="cell cell-section">3. Discussion</div>
-          <div class="cell cell-nist">
-            Baseline configurations for systems and system components include
-            connectivity, operational, and communications aspects of systems.
-          </div>
-          <div class="cell cell-response">
-            <div class="hint">
-              What your baselines cover and where they are stored (optional)
-            </div>
-            <textarea
-              id="discussionResponse"
-              name="discussionResponse"
-              placeholder="e.g. Baselines cover OS hardening (DISA STIGs), network device configs, database parameters..."
-            ></textarea>
-          </div>
-        </div>
-
-        <!-- Row 4: Related Controls -->
-        <div class="table-row">
-          <div class="cell cell-section">4. Related<br />Controls</div>
-          <div class="cell cell-nist">
-            AC-19, AU-6, CA-9, CM-1, CM-3, CM-5, CM-6, CM-8, CM-9, CP-9,
-            CP-10, CP-12, MA-2, PL-8, PM-5, SA-8, SA-10, SA-15, SC-18
-          </div>
-          <div class="cell cell-response">
-            <div class="hint">
-              Which related controls are most relevant (optional)
-            </div>
-            <textarea
-              id="relatedControlsResponse"
-              name="relatedControlsResponse"
-              placeholder="e.g. CM-1 (CMP), CM-3 (CCB change process), CM-6 (STIG/CIS settings)..."
-            ></textarea>
-          </div>
-        </div>
-
-        <!-- Row 5: Implementation Status -->
-        <div class="table-row">
-          <div class="cell cell-section">5. Implementation<br />Status</div>
-          <div class="cell cell-nist">
-            Implemented | Partially Implemented | Planned | Alternative | Not
-            Applicable
-          </div>
-          <div class="cell cell-response">
-            <select
-              id="implementationStatus"
-              name="implementationStatus"
-              required
-            >
-              <option value="" disabled selected>Select status&hellip;</option>
-              <option value="Implemented">Implemented</option>
-              <option value="Partially Implemented">
-                Partially Implemented
-              </option>
-              <option value="Planned">Planned</option>
-              <option value="Alternative">Alternative</option>
-              <option value="Not Applicable">Not Applicable</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Row 6: Organization-Defined Parameters -->
-        <div class="table-row">
-          <div class="cell cell-section">
-            6. Organization-<br />Defined<br />Parameters
-          </div>
-          <div class="cell cell-nist">
-            CM-02_ODP[01]: frequency<br />CM-02_ODP[02]: circumstances
-          </div>
-          <div class="cell cell-response">
-            <div class="odp-label">Frequency:</div>
             <input
               type="text"
               id="frequency"
               name="frequency"
               required
-              placeholder="e.g. annually and when directed by the AO"
+              placeholder="e.g. Annually and whenever directed by the Authorizing Official (AO)."
             />
-            <div class="odp-label">Circumstances:</div>
+          </div>
+        </div>
+
+        <!-- Row 2: CM-02_ODP[02] -->
+        <div class="table-row">
+          <div class="cell cell-section">CM-02_ODP[02]</div>
+          <div class="cell cell-nist">the circumstances requiring baseline configuration review and update are defined;</div>
+          <div class="cell cell-response">
             <input
               type="text"
               id="circumstances"
               name="circumstances"
               required
-              placeholder="e.g. security incidents, architecture changes"
+              placeholder="e.g. Security incidents, changes to federal mandates (OMB, CISA BODs, NIST updates), system architecture changes, or software/hardware end-of-life events."
             />
           </div>
         </div>
 
-        <!-- Row 7: Implementation Narrative -->
+        <!-- Row 3: CM-02a.[01] -->
         <div class="table-row">
-          <div class="cell cell-section">7. Implementation<br />Narrative</div>
-          <div class="cell cell-nist"></div>
+          <div class="cell cell-section">CM-02a.[01]</div>
+          <div class="cell cell-nist">a current baseline configuration of the system is developed and documented;</div>
           <div class="cell cell-response">
-            <div class="hint">
-              Describe how CM-02 is implemented in your system
-            </div>
             <textarea
-              id="implementationNarrative"
-              name="implementationNarrative"
-              required
-              style="min-height: 100px"
-              placeholder="e.g. The baseline configuration is documented in the CMP and maintained in an agency-approved CMDB..."
+              id="objA01"
+              name="objA01"
+              placeholder="e.g. Baseline documented in Configuration Management Plan (CMP) v4.2, covering OS hardening (DISA STIGs), network device configs (Cisco IOS-XE), database parameters (Oracle 19c), and application middleware."
             ></textarea>
           </div>
         </div>
 
-        <!-- Row 8: Assessment Objective -->
+        <!-- Row 4: CM-02a.[02] -->
         <div class="table-row">
-          <div class="cell cell-section">8. Assessment<br />Objective</div>
-          <div class="cell cell-nist">
-            Determine if:<br />a-1: baseline is developed and documented<br />a-2:
-            maintained under configuration control<br />b.1&ndash;b.3: reviewed
-            and updated per frequency, circumstances, and component changes
-          </div>
+          <div class="cell cell-section">CM-02a.[02]</div>
+          <div class="cell cell-nist">a current baseline configuration of the system is maintained under configuration control;</div>
           <div class="cell cell-response">
-            <div class="hint">Role accountable for this control</div>
-            <input
-              type="text"
-              id="responsibleRole"
-              name="responsibleRole"
-              required
-              placeholder="e.g. Information System Security Officer (ISSO)"
-            />
+            <textarea
+              id="objA02"
+              name="objA02"
+              placeholder="e.g. Baselines maintained in ServiceNow CMDB under change control; all modifications require CCB approval and are tracked with full version history."
+            ></textarea>
           </div>
         </div>
 
-        <!-- Row 9: Examine -->
+        <!-- Row 5: CM-02b.01 -->
         <div class="table-row">
-          <div class="cell cell-section">9. Examine</div>
-          <div class="cell cell-nist">
-            EXAMINE: [SELECT FROM: configuration management policy; CM
-            procedures; CMP; enterprise architecture docs; system design docs;
-            SSP; privacy plan; system architecture and config docs; config
-            settings; component inventory; change control records]
-          </div>
+          <div class="cell cell-section">CM-02b.01</div>
+          <div class="cell cell-nist">the baseline configuration of the system is reviewed and updated &lt;CM-02_ODP[01] frequency&gt;;</div>
           <div class="cell cell-response">
-            <div class="hint">
-              Specific artifacts/evidence for your system (optional)
-            </div>
+            <textarea
+              id="objB01"
+              name="objB01"
+              placeholder="e.g. Annual review completed 2025-09-15 by ISSO; next scheduled review 2026-09-15."
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Row 6: CM-02b.02 -->
+        <div class="table-row">
+          <div class="cell cell-section">CM-02b.02</div>
+          <div class="cell cell-nist">the baseline configuration of the system is reviewed and updated when required due to &lt;CM-02_ODP[02] circumstances&gt;;</div>
+          <div class="cell cell-response">
+            <textarea
+              id="objB02"
+              name="objB02"
+              placeholder="e.g. Ad-hoc reviews triggered by CISA BOD 23-01 (asset visibility), RHEL 8 EOL migration to RHEL 9, and post-incident baseline revalidation following 2025-Q2 phishing event."
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Row 7: CM-02b.03 -->
+        <div class="table-row">
+          <div class="cell cell-section">CM-02b.03</div>
+          <div class="cell cell-nist">the baseline configuration of the system is reviewed and updated when system components are installed or upgraded.</div>
+          <div class="cell cell-response">
+            <textarea
+              id="objB03"
+              name="objB03"
+              placeholder="e.g. Component baselines updated at each CCB-approved install/upgrade; most recent: Oracle 19c patch set 2025-07, Cisco IOS-XE 17.12 upgrade 2025-08."
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Row 8: Examine -->
+        <div class="table-row">
+          <div class="cell cell-section">CM-02-Examine</div>
+          <div class="cell cell-nist">[SELECT FROM: configuration management policy; procedures addressing the baseline configuration of the system; configuration management plan; enterprise architecture documentation; system design documentation; system security plan; privacy plan; system architecture and configuration documentation; system configuration settings and associated documentation; system component inventory; change control records; other relevant documents or records]</div>
+          <div class="cell cell-response">
             <textarea
               id="examineResponse"
               name="examineResponse"
-              placeholder="e.g. CMP v4.2; SSP Appendix M; CMDB baseline export; SCAP scan results; CCB meeting minutes..."
+              placeholder="e.g. Configuration Management Plan (CMP) v4.2; SSP Appendix M; CMDB baseline export (ServiceNow); SCAP scan results (Nessus, weekly); CCB meeting minutes and change records; DISA STIG checklists for Windows Server 2022, RHEL 9, Oracle 19c; network device running-config backups."
             ></textarea>
           </div>
         </div>
 
-        <!-- Row 10: Interview & Test -->
+        <!-- Row 9: Interview -->
         <div class="table-row">
-          <div class="cell cell-section">10. Interview<br />&amp; Test</div>
-          <div class="cell cell-nist">
-            INTERVIEW: [SELECT FROM: CM personnel; ISSO/ISSM; system/network
-            admins]<br /><br />TEST: [SELECT FROM: CM processes; automated
-            config control mechanisms]
-          </div>
+          <div class="cell cell-section">CM-02-Interview</div>
+          <div class="cell cell-nist">[SELECT FROM: organizational personnel with configuration management responsibilities; organizational personnel with information security and privacy responsibilities; system/network administrators]</div>
           <div class="cell cell-response">
-            <div class="hint">
-              Interviewees and test procedures (optional)
-            </div>
             <textarea
-              id="interviewTestResponse"
-              name="interviewTestResponse"
-              placeholder="e.g. INTERVIEW: ISSO (J. Martinez), CM Lead (R. Nguyen). TEST: Execute SCAP benchmark scan..."
+              id="interviewResponse"
+              name="interviewResponse"
+              placeholder="e.g. ISSO (J. Martinez), CM Lead (R. Nguyen), Senior Network Admin (T. Brooks)"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Row 10: Test -->
+        <div class="table-row">
+          <div class="cell cell-section">CM-02-Test</div>
+          <div class="cell cell-nist">[SELECT FROM: organizational processes for managing baseline configurations; mechanisms supporting configuration control of the baseline configuration]</div>
+          <div class="cell cell-response">
+            <textarea
+              id="testResponse"
+              name="testResponse"
+              placeholder="e.g. Execute SCAP benchmark scan against server baseline; verify CMDB accuracy against live inventory; validate CCB workflow in ServiceNow produces audit trail; confirm drift alerts trigger within 24h."
             ></textarea>
           </div>
         </div>
@@ -512,17 +438,16 @@
       // --- localStorage Draft Save/Load ---
       const DRAFT_KEY = "cm02-draft";
       const DRAFT_FIELDS = [
-        "systemName",
-        "implementationStatus",
         "frequency",
         "circumstances",
-        "implementationNarrative",
-        "responsibleRole",
-        "controlTextResponse",
-        "discussionResponse",
-        "relatedControlsResponse",
+        "objA01",
+        "objA02",
+        "objB01",
+        "objB02",
+        "objB03",
         "examineResponse",
-        "interviewTestResponse",
+        "interviewResponse",
+        "testResponse",
       ];
 
       function saveDraft() {
@@ -576,18 +501,16 @@
         submitBtn.textContent = "Generating\u2026";
 
         const payload = {
-          systemName: form.systemName.value.trim(),
-          implementationStatus: form.implementationStatus.value,
           frequency: form.frequency.value.trim(),
           circumstances: form.circumstances.value.trim(),
-          implementationNarrative: form.implementationNarrative.value.trim(),
-          responsibleRole: form.responsibleRole.value.trim(),
-          controlTextResponse: form.controlTextResponse.value.trim(),
-          discussionResponse: form.discussionResponse.value.trim(),
-          relatedControlsResponse:
-            form.relatedControlsResponse.value.trim(),
+          objA01: form.objA01.value.trim(),
+          objA02: form.objA02.value.trim(),
+          objB01: form.objB01.value.trim(),
+          objB02: form.objB02.value.trim(),
+          objB03: form.objB03.value.trim(),
           examineResponse: form.examineResponse.value.trim(),
-          interviewTestResponse: form.interviewTestResponse.value.trim(),
+          interviewResponse: form.interviewResponse.value.trim(),
+          testResponse: form.testResponse.value.trim(),
         };
 
         try {

@@ -18,13 +18,16 @@ describe("cm02Pdf", () => {
 
   test("generates a valid PDF buffer with full input", async () => {
     const buffer = await generatePdf({
-      systemName: "Test System Alpha",
-      implementationStatus: "Implemented",
-      implementationNarrative:
-        "The baseline configuration is maintained via automated CM tools.",
-      responsibleRole: "System Administrator",
       frequency: "annually",
       circumstances: "significant changes to the system architecture",
+      objA01: "Baseline documented in CMP v4.2.",
+      objA02: "Maintained in ServiceNow CMDB under change control.",
+      objB01: "Annual review completed 2025-09-15.",
+      objB02: "Ad-hoc reviews triggered by CISA BODs.",
+      objB03: "Component baselines updated at each CCB-approved upgrade.",
+      examineResponse: "CMP v4.2; SSP Appendix M",
+      interviewResponse: "ISSO (J. Martinez)",
+      testResponse: "Execute SCAP benchmark scan",
     });
     expect(Buffer.isBuffer(buffer)).toBe(true);
     expect(buffer.subarray(0, 5).toString()).toBe("%PDF-");
@@ -39,12 +42,9 @@ describe("cm02Pdf", () => {
     expect(Buffer.isBuffer(buffer)).toBe(true);
   });
 
-  test("includes discussion and related controls rows", async () => {
-    // Verify the PDF generates without error when all 10 rows render
-    const buffer = await generatePdf({ systemName: "Test" });
+  test("includes all 10 assessment rows", async () => {
+    const buffer = await generatePdf({ frequency: "annually", circumstances: "incidents" });
     expect(Buffer.isBuffer(buffer)).toBe(true);
-    // PDF with all 10 rows including discussion and related controls
-    // should be larger than a minimal PDF
     expect(buffer.length).toBeGreaterThan(2000);
   });
 });

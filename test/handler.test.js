@@ -8,6 +8,11 @@ jest.mock("../lib/s3Upload", () => ({
 const { handler } = require("../index");
 const { uploadAndPresign } = require("../lib/s3Upload");
 
+const validPayload = {
+  frequency: "annually",
+  circumstances: "major changes",
+};
+
 describe("handler", () => {
   beforeEach(() => {
     uploadAndPresign.mockClear();
@@ -39,14 +44,7 @@ describe("handler", () => {
   test("returns 200 with pdf_url on POST", async () => {
     const event = {
       requestContext: { http: { method: "POST" } },
-      body: JSON.stringify({
-        systemName: "My System",
-        implementationStatus: "Implemented",
-        implementationNarrative: "We do the thing.",
-        responsibleRole: "ISSO",
-        frequency: "annually",
-        circumstances: "major changes",
-      }),
+      body: JSON.stringify(validPayload),
     };
 
     const result = await handler(event);
@@ -75,14 +73,7 @@ describe("handler", () => {
   test("includes CORS headers on POST response", async () => {
     const event = {
       requestContext: { http: { method: "POST" } },
-      body: JSON.stringify({
-        systemName: "CORS Test",
-        implementationStatus: "Planned",
-        implementationNarrative: "Test.",
-        responsibleRole: "Admin",
-        frequency: "annually",
-        circumstances: "changes",
-      }),
+      body: JSON.stringify(validPayload),
     };
 
     const result = await handler(event);
@@ -113,7 +104,7 @@ describe("handler", () => {
   test("returns 400 for validation errors", async () => {
     const event = {
       requestContext: { http: { method: "POST" } },
-      body: JSON.stringify({ systemName: "" }),
+      body: JSON.stringify({}),
     };
 
     const result = await handler(event);
@@ -127,14 +118,7 @@ describe("handler", () => {
 
     const event = {
       requestContext: { http: { method: "POST" } },
-      body: JSON.stringify({
-        systemName: "Test",
-        implementationStatus: "Implemented",
-        implementationNarrative: "Test.",
-        responsibleRole: "Admin",
-        frequency: "annually",
-        circumstances: "changes",
-      }),
+      body: JSON.stringify(validPayload),
     };
 
     const result = await handler(event);
@@ -145,10 +129,6 @@ describe("handler", () => {
 
   test("handles direct event payload (no httpMethod)", async () => {
     const event = {
-      systemName: "Direct System",
-      implementationStatus: "Planned",
-      implementationNarrative: "Planning phase.",
-      responsibleRole: "Admin",
       frequency: "annually",
       circumstances: "changes",
     };

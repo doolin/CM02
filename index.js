@@ -74,17 +74,16 @@ exports.handler = async (event) => {
 
     // Generate PDF (trim all free-text inputs)
     const pdfBuffer = await generatePdf({
-      systemName: input.systemName.trim(),
-      implementationStatus: input.implementationStatus,
-      implementationNarrative: input.implementationNarrative.trim(),
-      responsibleRole: input.responsibleRole.trim(),
       frequency: input.frequency.trim(),
       circumstances: input.circumstances.trim(),
-      controlTextResponse: (input.controlTextResponse || "").trim(),
-      discussionResponse: (input.discussionResponse || "").trim(),
-      relatedControlsResponse: (input.relatedControlsResponse || "").trim(),
+      objA01: (input.objA01 || "").trim(),
+      objA02: (input.objA02 || "").trim(),
+      objB01: (input.objB01 || "").trim(),
+      objB02: (input.objB02 || "").trim(),
+      objB03: (input.objB03 || "").trim(),
       examineResponse: (input.examineResponse || "").trim(),
-      interviewTestResponse: (input.interviewTestResponse || "").trim(),
+      interviewResponse: (input.interviewResponse || "").trim(),
+      testResponse: (input.testResponse || "").trim(),
     });
 
     // Upload and return presigned URL
@@ -95,8 +94,6 @@ exports.handler = async (event) => {
       JSON.stringify({
         event: "pdf_generated",
         control: "CM-02",
-        systemName: input.systemName,
-        implementationStatus: input.implementationStatus,
         sourceIp,
         pdfSizeBytes: pdfBuffer.length,
         timestamp: new Date().toISOString(),

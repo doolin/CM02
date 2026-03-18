@@ -23,13 +23,16 @@ describe("E2E", () => {
     const event = {
       requestContext: { http: { method: "POST" } },
       body: JSON.stringify({
-        systemName: "DOJ Financial Management System",
-        implementationStatus: "Implemented",
         frequency: "annually and when directed by the AO",
         circumstances: "security incidents or architecture changes",
-        implementationNarrative:
-          "Baselines maintained via CMDB with DISA STIGs. Weekly SCAP scans detect drift.",
-        responsibleRole: "ISSO",
+        objA01: "Baseline documented in CMP v4.2.",
+        objA02: "Maintained in ServiceNow CMDB under change control.",
+        objB01: "Annual review completed 2025-09-15.",
+        objB02: "Ad-hoc reviews triggered by CISA BODs.",
+        objB03: "Component baselines updated at each CCB-approved upgrade.",
+        examineResponse: "CMP v4.2; SSP Appendix M",
+        interviewResponse: "ISSO (J. Martinez)",
+        testResponse: "Execute SCAP benchmark scan",
       }),
     };
 
@@ -65,16 +68,16 @@ describe("E2E", () => {
 
     expect(result.statusCode).toBe(200);
     expect(result.headers["Content-Type"]).toBe("text/html");
-    expect(result.body).toContain('id="systemName"');
-    expect(result.body).toContain('id="implementationStatus"');
     expect(result.body).toContain('id="frequency"');
     expect(result.body).toContain('id="circumstances"');
-    expect(result.body).toContain('id="implementationNarrative"');
-    expect(result.body).toContain('id="responsibleRole"');
+    expect(result.body).toContain('id="objA01"');
+    expect(result.body).toContain('id="examineResponse"');
+    expect(result.body).toContain('id="interviewResponse"');
+    expect(result.body).toContain('id="testResponse"');
     expect(result.body).toContain('type="submit"');
   });
 
-  test("validation rejects empty submission with 6 errors", async () => {
+  test("validation rejects empty submission with 2 errors", async () => {
     const event = {
       requestContext: { http: { method: "POST" } },
       body: JSON.stringify({}),
@@ -85,13 +88,9 @@ describe("E2E", () => {
     expect(result.statusCode).toBe(400);
     const body = JSON.parse(result.body);
     expect(body.errors).toBeDefined();
-    expect(body.errors).toHaveLength(6);
-    expect(body.errors).toContain("systemName is required");
-    expect(body.errors).toContain("implementationStatus is required");
+    expect(body.errors).toHaveLength(2);
     expect(body.errors).toContain("frequency is required");
     expect(body.errors).toContain("circumstances is required");
-    expect(body.errors).toContain("implementationNarrative is required");
-    expect(body.errors).toContain("responsibleRole is required");
     expect(uploadAndPresign).not.toHaveBeenCalled();
   });
 
