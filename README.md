@@ -151,6 +151,18 @@ npm test          # run all tests
 npm run format    # auto-format with prettier
 ```
 
+### Extract a control table from OSCAL
+
+`scripts/extract-control.js` extracts any control from the NIST SP
+800-53 Rev 5 OSCAL catalog into a markdown table or JSON.
+
+```bash
+node scripts/extract-control.js cm-2           # markdown table for CM-02
+node scripts/extract-control.js cm-2.2         # enhancement CM-02(02)
+node scripts/extract-control.js CM-02          # case-insensitive
+node scripts/extract-control.js ac-1 --json    # JSON output
+```
+
 ## PDF artifact storage (inventium-artifacts bucket)
 
 CM02 generates PDFs and serves them to unauthenticated users via
