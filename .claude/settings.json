@@ -9,7 +9,17 @@
       "Read(//Users/daviddoolin/src/retirement/**)",
       "Read(//Users/daviddoolin/src/vietnam-war-compendium/this-day/**)",
       "Bash(grep -E \"\\\\.js$|\\\\.sh$|\\\\.ts$\")",
-      "Bash(xargs cat:*)"
+      "Bash(xargs cat:*)",
+      "Bash(node -e \":*)",
+      "Bash(npm test:*)",
+      "Bash(node scripts/extract-control.js cm-2)",
+      "Bash(node scripts/extract-control.js cm-2.2)",
+      "Bash(node scripts/extract-control.js cm-2.2 --json)",
+      "Bash(node scripts/extract-control.js AC-1)",
+      "Bash(node scripts/extract-control.js CM-02)",
+      "Bash(node scripts/extract-control.js 'CM-02\\(02\\)')",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
