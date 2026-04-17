@@ -203,3 +203,8 @@ jobs:
           cat /tmp/response.json
           BODY=$(jq -r '.body' /tmp/response.json)
           echo "$BODY" | jq -e '.pdf_url'
+
+      - name: Emit pipeline audit summary (M-21-31)
+        if: always()
+        run: |
+          echo '{"event":"deployment_completed","severity":"INFO","status":"${{ job.status }}","commit":"'$GITHUB_SHA'","run_id":"'$GITHUB_RUN_ID'","ref":"'$GITHUB_REF'","actor":"'$GITHUB_ACTOR'","timestamp":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
