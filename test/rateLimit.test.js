@@ -1,4 +1,8 @@
-const { checkRateLimit, resetRateLimit, MAX_REQUESTS } = require("../lib/rateLimit");
+const {
+  checkRateLimit,
+  resetRateLimit,
+  MAX_REQUESTS,
+} = require("../lib/rateLimit");
 
 describe("rateLimit", () => {
   beforeEach(() => {

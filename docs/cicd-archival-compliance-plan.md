@@ -6,16 +6,16 @@ This plan addresses every recommendation in [cicd-archival-rfc-feedback.txt](cic
 
 ## References
 
-| ID | Document | Canonical URL |
-|----|----------|---------------|
-| R1 | OMB M-21-31 — Improving Investigative and Remediation Capabilities | [whitehouse.gov](https://www.whitehouse.gov/wp-content/uploads/2021/08/M-21-31-Improving-the-Federal-Governments-Investigative-and-Remediation-Capabilities-Related-to-Cybersecurity-Incidents.pdf) |
-| R2 | NIST SP 800-218 — Secure Software Development Framework (SSDF) v1.1 | [csrc.nist.gov](https://csrc.nist.gov/pubs/sp/800/218/final) |
-| R3 | OMB M-24-15 — Modernizing FedRAMP | [fedramp.gov](https://www.fedramp.gov/docs/authority/m-24-15/) |
-| R4 | OMB M-26-05 — Risk-Based Approach to Software and Hardware Security | [whitehouse.gov](https://www.whitehouse.gov/wp-content/uploads/2026/01/M-26-05-Adopting-a-Risk-based-Approach-to-Software-and-Hardware-Security.pdf) |
-| R5 | NIST OSCAL — Open Security Controls Assessment Language | [pages.nist.gov](https://pages.nist.gov/OSCAL/) |
-| R6 | FedRAMP Program | [fedramp.gov](https://www.fedramp.gov/) |
-| R7 | NIST SP 800-53 Rev 5 — Security and Privacy Controls | [csrc.nist.gov](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) |
-| R8 | NIST SP 800-53A Rev 5 — Assessing Security and Privacy Controls | [csrc.nist.gov](https://csrc.nist.gov/pubs/sp/800/53/a/r5/final) |
+| ID  | Document                                                            | Canonical URL                                                                                                                                                                                       |
+| --- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R1  | OMB M-21-31 — Improving Investigative and Remediation Capabilities  | [whitehouse.gov](https://www.whitehouse.gov/wp-content/uploads/2021/08/M-21-31-Improving-the-Federal-Governments-Investigative-and-Remediation-Capabilities-Related-to-Cybersecurity-Incidents.pdf) |
+| R2  | NIST SP 800-218 — Secure Software Development Framework (SSDF) v1.1 | [csrc.nist.gov](https://csrc.nist.gov/pubs/sp/800/218/final)                                                                                                                                        |
+| R3  | OMB M-24-15 — Modernizing FedRAMP                                   | [fedramp.gov](https://www.fedramp.gov/docs/authority/m-24-15/)                                                                                                                                      |
+| R4  | OMB M-26-05 — Risk-Based Approach to Software and Hardware Security | [whitehouse.gov](https://www.whitehouse.gov/wp-content/uploads/2026/01/M-26-05-Adopting-a-Risk-based-Approach-to-Software-and-Hardware-Security.pdf)                                                |
+| R5  | NIST OSCAL — Open Security Controls Assessment Language             | [pages.nist.gov](https://pages.nist.gov/OSCAL/)                                                                                                                                                     |
+| R6  | FedRAMP Program                                                     | [fedramp.gov](https://www.fedramp.gov/)                                                                                                                                                             |
+| R7  | NIST SP 800-53 Rev 5 — Security and Privacy Controls                | [csrc.nist.gov](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final)                                                                                                                                 |
+| R8  | NIST SP 800-53A Rev 5 — Assessing Security and Privacy Controls     | [csrc.nist.gov](https://csrc.nist.gov/pubs/sp/800/53/a/r5/final)                                                                                                                                    |
 
 ---
 
@@ -194,18 +194,18 @@ Teams can adopt the Golden Pipeline with zero compliance configuration. Every pi
 
 ## MECE Coverage Verification
 
-| Feedback Item | Work Stream |
-|---------------|-------------|
-| 1. Continuous verification (M-26-05) | WS2 (evidence store), WS5 (continuous verification) |
-| 1. S3 as authoritative evidence store | WS2 |
-| 1. Pipeline-produced evidence, no vendor trust | WS5 |
-| 1. Review with SSD (Robert Anderson) | Cross-Cutting |
-| 2. OSCAL required artifact class (M-24-15) | WS4 |
-| 2. OSCAL scan results, component defs, attestations | WS4 |
-| 3. SSDF showstopper controls (NIST 800-218) | WS1 |
-| 3. SBOMs, scan results, metadata in archive | WS1 |
-| 4. SOC log streaming (M-21-31) | WS3 |
-| 4. EL3 scoping for FSA | WS3 |
-| Overall: Golden Pipeline | WS6 |
-| Overall: SSD/CISO review | Cross-Cutting |
-| Overall: Outcome over controls | Cross-Cutting (guiding principle) |
+| Feedback Item                                       | Work Stream                                         |
+| --------------------------------------------------- | --------------------------------------------------- |
+| 1. Continuous verification (M-26-05)                | WS2 (evidence store), WS5 (continuous verification) |
+| 1. S3 as authoritative evidence store               | WS2                                                 |
+| 1. Pipeline-produced evidence, no vendor trust      | WS5                                                 |
+| 1. Review with SSD (Robert Anderson)                | Cross-Cutting                                       |
+| 2. OSCAL required artifact class (M-24-15)          | WS4                                                 |
+| 2. OSCAL scan results, component defs, attestations | WS4                                                 |
+| 3. SSDF showstopper controls (NIST 800-218)         | WS1                                                 |
+| 3. SBOMs, scan results, metadata in archive         | WS1                                                 |
+| 4. SOC log streaming (M-21-31)                      | WS3                                                 |
+| 4. EL3 scoping for FSA                              | WS3                                                 |
+| Overall: Golden Pipeline                            | WS6                                                 |
+| Overall: SSD/CISO review                            | Cross-Cutting                                       |
+| Overall: Outcome over controls                      | Cross-Cutting (guiding principle)                   |

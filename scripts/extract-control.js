@@ -1,22 +1,27 @@
 #!/usr/bin/env node
-'use strict';
+"use strict";
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const CATALOG_PATH = path.join(__dirname, '..', 'data', 'NIST_SP-800-53_rev5_catalog.json');
+const CATALOG_PATH = path.join(
+  __dirname,
+  "..",
+  "data",
+  "NIST_SP-800-53_rev5_catalog.json",
+);
 
 // ---------------------------------------------------------------------------
 // CLI
 // ---------------------------------------------------------------------------
 const args = process.argv.slice(2);
-const jsonFlag = args.includes('--json');
-const controlArg = args.find(a => !a.startsWith('--'));
+const jsonFlag = args.includes("--json");
+const controlArg = args.find((a) => !a.startsWith("--"));
 
 if (!controlArg) {
-  console.error('Usage: node scripts/extract-control.js <control-id> [--json]');
-  console.error('  Examples: node scripts/extract-control.js cm-2');
-  console.error('           node scripts/extract-control.js cm-2.2 --json');
+  console.error("Usage: node scripts/extract-control.js <control-id> [--json]");
+  console.error("  Examples: node scripts/extract-control.js cm-2");
+  console.error("           node scripts/extract-control.js cm-2.2 --json");
   process.exit(1);
 }
 
@@ -31,8 +36,8 @@ function normalizeId(raw) {
     return `${enhMatch[1]}-${enhMatch[2]}.${enhMatch[3]}`;
   }
   // Strip leading zeros from numeric parts: cm-02 -> cm-2, cm-02.02 -> cm-2.2
-  id = id.replace(/(?<=-)0+(\d)/g, '$1');
-  id = id.replace(/\.0+(\d)/g, '.$1');
+  id = id.replace(/(?<=-)0+(\d)/g, "$1");
+  id = id.replace(/\.0+(\d)/g, ".$1");
   return id;
 }
 
@@ -41,7 +46,7 @@ const controlId = normalizeId(controlArg);
 // ---------------------------------------------------------------------------
 // Load catalog and find control
 // ---------------------------------------------------------------------------
-const catalog = JSON.parse(fs.readFileSync(CATALOG_PATH, 'utf8'));
+const catalog = JSON.parse(fs.readFileSync(CATALOG_PATH, "utf8"));
 
 function findControl(id) {
   for (const group of catalog.catalog.groups || []) {
@@ -68,9 +73,9 @@ if (!control) {
 
 /** Get the sp800-53a label from a props array. */
 function getLabel(props) {
-  if (!props) return '';
-  const p = props.find(x => x.name === 'label' && x.class === 'sp800-53a');
-  return p ? p.value : '';
+  if (!props) return "";
+  const p = props.find((x) => x.name === "label" && x.class === "sp800-53a");
+  return p ? p.value : "";
 }
 
 /** Build a map from param id -> { label, guidelineProse, paramLabel } */
@@ -78,29 +83,32 @@ function buildParamMap(params) {
   const map = {};
   for (const p of params || []) {
     const label = getLabel(p.props);
-    const guidelineProse = (p.guidelines || []).map(g => g.prose).join(' ');
-    map[p.id] = { label, guidelineProse, paramLabel: p.label || '' };
+    const guidelineProse = (p.guidelines || []).map((g) => g.prose).join(" ");
+    map[p.id] = { label, guidelineProse, paramLabel: p.label || "" };
   }
   return map;
 }
 
 /** Resolve {{ insert: param, <id> }} placeholders using param map. */
 function resolveInserts(prose, paramMap) {
-  if (!prose) return '';
-  return prose.replace(/\{\{\s*insert:\s*param,\s*([^}\s]+)\s*\}\}/g, (_match, paramId) => {
-    const info = paramMap[paramId];
-    if (info) {
-      return `<${info.label} ${info.paramLabel}>`;
-    }
-    return `<${paramId}>`;
-  });
+  if (!prose) return "";
+  return prose.replace(
+    /\{\{\s*insert:\s*param,\s*([^}\s]+)\s*\}\}/g,
+    (_match, paramId) => {
+      const info = paramMap[paramId];
+      if (info) {
+        return `<${info.label} ${info.paramLabel}>`;
+      }
+      return `<${paramId}>`;
+    },
+  );
 }
 
 /** Recursively collect leaf assessment-objective nodes (those with prose). */
 function collectObjectives(parts, paramMap, results) {
   if (!parts) return;
   for (const p of parts) {
-    if (p.name === 'assessment-objective') {
+    if (p.name === "assessment-objective") {
       if (p.prose) {
         // Leaf node with actual prose
         results.push({
@@ -121,12 +129,16 @@ function collectMethods(parts, paramMap) {
   const results = [];
   if (!parts) return results;
   for (const p of parts) {
-    if (p.name === 'assessment-method') {
+    if (p.name === "assessment-method") {
       const label = getLabel(p.props);
       // The method type is embedded in the label, e.g. "CM-02-Examine"
       // The nested part (assessment-objects) holds the prose listing.
-      const objectsParts = (p.parts || []).filter(c => c.name === 'assessment-objects');
-      const prose = objectsParts.map(o => resolveInserts(o.prose, paramMap)).join('\n\n');
+      const objectsParts = (p.parts || []).filter(
+        (c) => c.name === "assessment-objects",
+      );
+      const prose = objectsParts
+        .map((o) => resolveInserts(o.prose, paramMap))
+        .join("\n\n");
       results.push({ section: label, text: prose });
     }
   }
@@ -139,15 +151,17 @@ function collectMethods(parts, paramMap) {
 const paramMap = buildParamMap(control.params);
 
 // ODP rows
-const odpRows = (control.params || []).map(p => {
+const odpRows = (control.params || []).map((p) => {
   const label = getLabel(p.props);
-  const prose = (p.guidelines || []).map(g => g.prose).join(' ');
+  const prose = (p.guidelines || []).map((g) => g.prose).join(" ");
   return { section: label, text: prose };
 });
 
 // Assessment objectives
 const objectiveRows = [];
-const objPart = (control.parts || []).find(p => p.name === 'assessment-objective');
+const objPart = (control.parts || []).find(
+  (p) => p.name === "assessment-objective",
+);
 if (objPart) {
   // Start from the top-level assessment-objective; it may have prose itself
   // or only children. collectObjectives handles both.
@@ -176,12 +190,12 @@ if (jsonFlag) {
 } else {
   // Markdown table output
   console.log(`# ${controlLabel}: ${title}`);
-  console.log('');
+  console.log("");
   // Escape pipe characters in prose for markdown table safety
-  const esc = (s) => s.replace(/\|/g, '\\|').replace(/\n/g, '<br>');
+  const esc = (s) => s.replace(/\|/g, "\\|").replace(/\n/g, "<br>");
 
-  console.log('| Section | NIST Text | Response |');
-  console.log('|---------|-----------|----------|');
+  console.log("| Section | NIST Text | Response |");
+  console.log("|---------|-----------|----------|");
   for (const row of odpRows) {
     console.log(`| ${esc(row.section)} | ${esc(row.text)} | |`);
   }

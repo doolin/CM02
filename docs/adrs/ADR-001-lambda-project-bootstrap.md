@@ -58,12 +58,12 @@ guidance.
 
 ### 2.3 Existing Projects Following This Pattern
 
-| Project | Runtime | Framework | Data |
-|---------|---------|-----------|------|
-| CM02 | Node.js 20 | None (raw handler) | OSCAL JSON |
-| slacronym | Node.js 20 (ESM) | None (raw handler) | JSON file |
-| retirement | Ruby 3.3 | Sinatra + lamby | In-memory SQLite3 |
-| this-day | Ruby 3.3 | Roda + lamby | Bundled SQLite3 |
+| Project    | Runtime          | Framework          | Data              |
+| ---------- | ---------------- | ------------------ | ----------------- |
+| CM02       | Node.js 20       | None (raw handler) | OSCAL JSON        |
+| slacronym  | Node.js 20 (ESM) | None (raw handler) | JSON file         |
+| retirement | Ruby 3.3         | Sinatra + lamby    | In-memory SQLite3 |
+| this-day   | Ruby 3.3         | Roda + lamby       | Bundled SQLite3   |
 
 ---
 
@@ -75,14 +75,14 @@ The application repo contains **only application code, tests, CI/CD,
 and deployment packaging**. It does not create or manage any AWS
 resources. All infrastructure is defined in `form-terra`:
 
-| Concern | Where |
-|---------|-------|
-| Lambda function, API Gateway, IAM role | `form-terra` |
-| S3 buckets, IAM policies for data access | `form-terra` |
-| CloudFront distribution, custom domain, ACM cert | `form-terra` |
-| GitHub Actions OIDC deploy role | `form-terra` |
-| Application code, handler, tests, CI/CD workflow | Application repo |
-| Optional: Terraform for custom domain mapping | Application repo (`terraform/`) |
+| Concern                                          | Where                           |
+| ------------------------------------------------ | ------------------------------- |
+| Lambda function, API Gateway, IAM role           | `form-terra`                    |
+| S3 buckets, IAM policies for data access         | `form-terra`                    |
+| CloudFront distribution, custom domain, ACM cert | `form-terra`                    |
+| GitHub Actions OIDC deploy role                  | `form-terra`                    |
+| Application code, handler, tests, CI/CD workflow | Application repo                |
+| Optional: Terraform for custom domain mapping    | Application repo (`terraform/`) |
 
 The application repo may include a `terraform/` directory for
 resources tightly coupled to the application (e.g., custom domain
@@ -150,7 +150,8 @@ exports.handler = async (event) => {
 
   if (method === "GET") {
     const html = fs.readFileSync(
-      path.join(__dirname, "public", "index.html"), "utf8"
+      path.join(__dirname, "public", "index.html"),
+      "utf8",
     );
     return {
       statusCode: 200,
@@ -238,10 +239,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - # Setup runtime (Node/Ruby)
-      - # Install dependencies
-      - # Lint/format check
-      - # Run tests
+      -  # Setup runtime (Node/Ruby)
+      -  # Install dependencies
+      -  # Lint/format check
+      -  # Run tests
 
   deploy:
     needs: test
@@ -249,16 +250,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - # Setup runtime
-      - # Install production dependencies only
-      - # Build deployment zip (exclude tests, dev deps, large data files)
-      - # Configure AWS credentials via OIDC
-      - # Upload zip to Lambda
-      - # Wait for update
-      - # Smoke test (invoke and verify response with jq)
+      -  # Setup runtime
+      -  # Install production dependencies only
+      -  # Build deployment zip (exclude tests, dev deps, large data files)
+      -  # Configure AWS credentials via OIDC
+      -  # Upload zip to Lambda
+      -  # Wait for update
+      -  # Smoke test (invoke and verify response with jq)
 ```
 
 **Critical details:**
+
 - Branch name must match the actual default branch (`master` or `main`)
 - OIDC trust condition in form-terra must match the branch name
 - Smoke test must parse the Lambda response body (use `jq`), not grep
@@ -361,12 +363,14 @@ An autonomous agent given a PRD should execute these steps in order:
 ## 5. Consequences
 
 ### 5.1 Positive
+
 - New Lambda projects can be scaffolded in minutes by an agent
 - Consistent structure across all projects makes maintenance easier
 - Clear separation between application and infrastructure concerns
 - Every project works locally without AWS credentials
 
 ### 5.2 Negative
+
 - Pattern is opinionated — projects that don't fit the mold need
   explicit deviations documented
 - Two-repo coordination (app + form-terra) requires understanding
@@ -374,11 +378,11 @@ An autonomous agent given a PRD should execute these steps in order:
 
 ### 5.3 Risks
 
-| Risk | Mitigation |
-|------|------------|
-| Agent scaffolds CI for wrong branch name | Verify with `git branch` before writing workflow |
+| Risk                                                                | Mitigation                                                                |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Agent scaffolds CI for wrong branch name                            | Verify with `git branch` before writing workflow                          |
 | Agent creates Terraform resources that reference undefined policies | All cross-repo references must use `data` sources or be clearly commented |
-| Agent over-engineers the solution | Follow the PRD scope; do not add features not requested |
+| Agent over-engineers the solution                                   | Follow the PRD scope; do not add features not requested                   |
 
 ---
 
