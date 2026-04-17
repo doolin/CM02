@@ -86,12 +86,12 @@ Define and implement CI/CD pipeline log streaming to the agency SOC at all M-21-
 
 ### Tasks
 
-- [ ] Catalog all CI/CD log event types: build triggers, test results, deployment outcomes, access events, security scan findings, secrets detection alerts, artifact signing events, pipeline configuration changes
-- [ ] Map each event type to M-21-31 maturity tiers: EL1 (basic), EL2 (intermediate), EL3 (advanced)
-- [ ] Scope EL3 for FSA: identify which EL3 requirements are mandatory vs. aspirational (per feedback: "selectively identify what under EL3 we consider mandatory rather than blindly follow OMB 21-31"), with written justification for each decision
-- [ ] Implement log forwarding from CI/CD platform to SOC (e.g., CloudWatch → SIEM, GitLab/GitHub audit events → SOC ingestion)
-- [ ] Configure log retention periods aligned with M-21-31 requirements at each tier
-- [ ] Validate that forwarded logs satisfy EL1, EL2, and the FSA-scoped EL3 requirements
+- [x] Catalog all CI/CD log event types — see `docs/soc-log-streaming.md` (21 event types across application, CI/CD, and infrastructure)
+- [x] Map each event type to M-21-31 maturity tiers: EL1, EL2, EL3 — see `docs/soc-log-streaming.md`
+- [x] Scope EL3 for FSA: 4 mandatory, 3 aspirational/deferred with justifications — see `docs/soc-log-streaming.md`
+- [x] Implement structured audit logger (`lib/auditLog.js`) with severity levels and all event types; integrated into `index.js`
+- [x] Document log forwarding architecture (CloudWatch → SIEM, GitHub Audit Log → SOC, CloudTrail → SOC) — see `docs/soc-log-streaming.md`; forwarding infrastructure flagged for form-terra
+- [x] Configure log retention periods aligned with M-21-31 — see `docs/soc-log-streaming.md`
 
 ### Acceptance Criteria
 

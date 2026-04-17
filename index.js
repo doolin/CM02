@@ -4,6 +4,7 @@ const { generatePdf } = require("./lib/cm02Pdf");
 const { uploadAndPresign } = require("./lib/s3Upload");
 const { validate } = require("./lib/validate");
 const { checkRateLimit } = require("./lib/rateLimit");
+const { auditLog } = require("./lib/auditLog");
 
 const htmlPath = path.join(__dirname, "public", "index.html");
 
@@ -22,15 +23,22 @@ function errorResponse(statusCode, message) {
 }
 
 exports.handler = async (event) => {
+  const sourceIp =
+    event.requestContext?.http?.sourceIp ||
+    event.requestContext?.identity?.sourceIp ||
+    "unknown";
+  const requestId =
+    event.requestContext?.requestId ||
+    event.requestContext?.http?.requestId ||
+    undefined;
+
   try {
     const method = event.requestContext?.http?.method || event.httpMethod;
 
-    // Handle CORS preflight
     if (method === "OPTIONS") {
       return { statusCode: 204, headers: CORS_HEADERS, body: "" };
     }
 
-    // Serve the web form on GET
     if (method === "GET") {
       const html = fs.readFileSync(htmlPath, "utf8");
       return {
@@ -40,31 +48,27 @@ exports.handler = async (event) => {
       };
     }
 
-    // Only POST is allowed for PDF generation
     if (method && method !== "POST") {
+      auditLog.methodNotAllowed({ method, sourceIp, requestId });
       return errorResponse(405, `Method ${method} not allowed`);
     }
 
-    // Rate limit POST requests
-    const sourceIp =
-      event.requestContext?.http?.sourceIp ||
-      event.requestContext?.identity?.sourceIp ||
-      "unknown";
     if (!checkRateLimit(sourceIp)) {
+      auditLog.rateLimitExceeded({ sourceIp, requestId });
       return errorResponse(429, "Too many requests. Try again in a minute.");
     }
 
-    // Parse body
     let input;
     try {
       input = typeof event.body === "string" ? JSON.parse(event.body) : event;
     } catch {
+      auditLog.invalidJson({ sourceIp, requestId });
       return errorResponse(400, "Invalid JSON in request body");
     }
 
-    // Validate
     const errors = validate(input);
     if (errors.length > 0) {
+      auditLog.validationFailed({ errors, sourceIp, requestId });
       return {
         statusCode: 400,
         headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
@@ -72,7 +76,6 @@ exports.handler = async (event) => {
       };
     }
 
-    // Generate PDF (trim all free-text inputs)
     const pdfBuffer = await generatePdf({
       frequency: input.frequency.trim(),
       circumstances: input.circumstances.trim(),
@@ -86,19 +89,14 @@ exports.handler = async (event) => {
       testResponse: (input.testResponse || "").trim(),
     });
 
-    // Upload and return presigned URL
     const { url } = await uploadAndPresign(pdfBuffer);
 
-    // Audit log for CloudWatch
-    console.log(
-      JSON.stringify({
-        event: "pdf_generated",
-        control: "CM-02",
-        sourceIp,
-        pdfSizeBytes: pdfBuffer.length,
-        timestamp: new Date().toISOString(),
-      }),
-    );
+    auditLog.pdfGenerated({
+      control: "CM-02",
+      sourceIp,
+      requestId,
+      pdfSizeBytes: pdfBuffer.length,
+    });
 
     return {
       statusCode: 200,
@@ -106,14 +104,12 @@ exports.handler = async (event) => {
       body: JSON.stringify({ pdf_url: url }),
     };
   } catch (err) {
-    console.error(
-      JSON.stringify({
-        event: "lambda_error",
-        error: err.message,
-        stack: err.stack,
-        timestamp: new Date().toISOString(),
-      }),
-    );
+    auditLog.lambdaError({
+      error: err.message,
+      stack: err.stack,
+      sourceIp,
+      requestId,
+    });
     return errorResponse(500, "Internal server error");
   }
 };
