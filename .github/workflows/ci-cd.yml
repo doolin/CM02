@@ -53,7 +53,9 @@ jobs:
       - run: npm ci
 
       - name: npm audit (dependency vulnerabilities)
-        run: npm audit --audit-level=high --omit=dev || true
+        run: |
+          npm audit --audit-level=high --omit=dev --json > npm-audit-results.json || true
+          npm audit --audit-level=high --omit=dev || true
 
       - name: Trivy filesystem scan
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
@@ -62,6 +64,24 @@ jobs:
           scan-ref: .
           format: table
           severity: CRITICAL,HIGH
+
+      - name: Trivy filesystem scan (JSON for evidence archive)
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: json
+          output: trivy-scan-results.json
+          severity: CRITICAL,HIGH
+
+      - name: Upload scan results
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: scan-results
+          path: |
+            npm-audit-results.json
+            trivy-scan-results.json
+          retention-days: 90
 
   sbom:
     name: SBOM Generation (PW.4)
@@ -134,6 +154,32 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: us-west-1
+
+      - name: Download SBOM artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: sbom
+          path: evidence/
+
+      - name: Download scan results
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: scan-results
+          path: evidence/
+
+      - name: Archive evidence to S3
+        run: |
+          TIMESTAMP=$(date -u +%Y-%m-%dT%H-%M-%SZ)
+          COMMIT=${GITHUB_SHA:0:12}
+          for file in evidence/*.json; do
+            BASENAME=$(basename "$file")
+            SHA256=$(sha256sum "$file" | cut -d' ' -f1)
+            S3KEY="cm02/evidence/${BASENAME%.json}/${TIMESTAMP}-${COMMIT}-${BASENAME}"
+            aws s3 cp "$file" "s3://${{ secrets.S3_EVIDENCE_BUCKET || 'inventium-artifacts' }}/${S3KEY}" \
+              --checksum-algorithm SHA256 \
+              --metadata "sha256-digest=${SHA256},commit=${GITHUB_SHA},run-id=${GITHUB_RUN_ID},artifact-type=${BASENAME%.json}"
+            echo "Archived: s3://${{ secrets.S3_EVIDENCE_BUCKET || 'inventium-artifacts' }}/${S3KEY}"
+          done
 
       - name: Deploy to Lambda
         run: |
