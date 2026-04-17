@@ -111,9 +111,40 @@ jobs:
           path: sbom-cyclonedx.json
           retention-days: 90
 
+  oscal:
+    name: OSCAL Generation (M-24-15)
+    runs-on: ubuntu-latest
+    needs: [vulnerability-scan]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Download scan results
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: scan-results
+          path: evidence/
+
+      - name: Generate and validate OSCAL artifacts
+        run: node scripts/generate-oscal.js evidence/
+
+      - name: Upload OSCAL artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: oscal-artifacts
+          path: |
+            evidence/oscal-assessment-results.json
+            evidence/oscal-component-definition.json
+            evidence/oscal-ssp-fragment.json
+          retention-days: 90
+
   deploy:
     name: Deploy Lambda
-    needs: [test, secrets-scan, vulnerability-scan, sbom]
+    needs: [test, secrets-scan, vulnerability-scan, sbom, oscal]
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
@@ -165,6 +196,12 @@ jobs:
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: scan-results
+          path: evidence/
+
+      - name: Download OSCAL artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: oscal-artifacts
           path: evidence/
 
       - name: Archive evidence to S3
