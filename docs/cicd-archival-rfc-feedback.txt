@@ -1,0 +1,67 @@
+CI/CD Archival Standard RFC - Federal Compliance Feedback
+=========================================================
+
+Section-Specific Comments
+-------------------------
+
+We may need to add more specifics on each section of this RFC. For
+instance, to align the CI/CD archival standard with current federal
+guidance (OMB M-26-05, M-24-15, NIST 800-218), several strategic
+enhancements should be incorporated:
+
+1. Federal Compliance Has Shifted to Continuous Verification. Under
+OMB M-26-05 (2026), paper-based attestations are no longer sufficient.
+Agencies must operate CI/CD pipelines using continuous,
+machine-verifiable evidence.
+
+  - Retained artifacts should not only support audits, but they must
+    also directly satisfy continuous verification expectations. Please
+    review with SSD (Robert Anderson)
+  - Our S3 archival model should be positioned as the authoritative
+    evidence store required to meet post-2026 compliance posture
+
+Implicit vendor trust is no longer acceptable, evidence must be produced by the
+pipeline itself.
+
+2. OSCAL Output Should Become a Required Artifact Class. Under OMB M-24-15
+(FedRAMP Modernization):
+
+  - Agencies must generate and ingest OSCAL-formatted compliance
+    artifacts by July 2026.
+  - The evidence packages defined in Option 3 should explicitly include:
+    OSCAL security scan results
+    OSCAL component definitions (build system, pipeline, IaC)
+    OSCAL attestations from SAST/DAST/SBOM tooling / SCA
+
+3. Mandatory DevSecOps Controls Should Be Called Out. NIST 800-218
+(SSDF) mandates several showstopper controls. Clarify that the archive
+must contain SBOMs, scan results, and metadata because these are
+required SSDF controls.
+
+4. CI/CD Logs Must Feed Agency SOC (OMB M-21-31). Perhaps we should
+explicitly reference EL3 logging maturity. (FSA should selectively
+identify what under EL3 we consider mandatory rather than blindly
+follow OMB 21-31)
+
+
+Overall Assessment
+------------------
+
+The RFC is very comprehensive with the thought process straight
+forward. I have some comments, hoping to add more specifics to some
+statements, and thought inserting them here would cover my overall
+assessment. The archival standard presented must also position FSA for
+post-2026 federal compliance expectations. OMB M-26-05 requires
+continuous verification and machine-readable evidence, eliminating
+reliance on paper-based attestations. OMB M-24-15 requires that CI/CD
+pipelines emit OSCAL-formatted security artifacts. NIST 800-218 (SSDF)
+mandates automated governance, secrets scanning, and SBOM generation.
+Therefore, the standardized evidence package should include OSCAL
+outputs, SBOMs, provenance metadata, and security scan results.
+Implementing a pre-approved 'Golden Pipeline' can ensure teams inherit
+compliant controls automatically, while audit logs and GitLab Actions
+metadata should stream to the SOC to satisfy OMB M-21-31 logging
+maturity requirements. I suggest checking with the SSD (CISO
+organization) to validate or enhance my feedback. Our focus should
+always be on the outcome, rather than just looking at controls.
+Hopefully the outcome is better control over CI/CD pipeline releases.
