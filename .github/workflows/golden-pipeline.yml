@@ -1,0 +1,201 @@
+name: Golden Pipeline
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: "Node.js version"
+        required: false
+        type: string
+        default: "20"
+      test-command:
+        description: "Test command"
+        required: false
+        type: string
+        default: "npm test"
+      format-check-command:
+        description: "Format check command"
+        required: false
+        type: string
+        default: "npm run format:check"
+      trivy-severity:
+        description: "Trivy scan severity levels"
+        required: false
+        type: string
+        default: "CRITICAL,HIGH"
+      npm-audit-level:
+        description: "npm audit minimum severity"
+        required: false
+        type: string
+        default: "high"
+
+jobs:
+  secrets-scan:
+    name: Secrets Scan (PW.6)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - uses: gitleaks/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc # v2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+
+      - run: npm ci
+      - run: ${{ inputs.format-check-command }}
+      - run: ${{ inputs.test-command }}
+
+  vulnerability-scan:
+    name: Vulnerability Scan (PW.7, PW.8)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: npm audit (dependency vulnerabilities)
+        run: |
+          npm audit --audit-level=${{ inputs.npm-audit-level }} --omit=dev --json > npm-audit-results.json || true
+          npm audit --audit-level=${{ inputs.npm-audit-level }} --omit=dev || true
+
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: table
+          severity: ${{ inputs.trivy-severity }}
+
+      - name: Trivy filesystem scan (JSON for evidence)
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: json
+          output: trivy-scan-results.json
+          severity: ${{ inputs.trivy-severity }}
+
+      - name: Upload scan results
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: scan-results
+          path: |
+            npm-audit-results.json
+            trivy-scan-results.json
+          retention-days: 90
+
+  sbom:
+    name: SBOM Generation (PW.4)
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+
+      - run: npm ci --omit=dev
+
+      - name: Generate CycloneDX SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
+        with:
+          format: cyclonedx-json
+          artifact-name: sbom-cyclonedx.json
+          output-file: sbom-cyclonedx.json
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: sbom
+          path: sbom-cyclonedx.json
+          retention-days: 90
+
+  oscal:
+    name: OSCAL Generation (M-24-15)
+    runs-on: ubuntu-latest
+    needs: [vulnerability-scan]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+
+      - name: Download scan results
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: scan-results
+          path: evidence/
+
+      - name: Generate and validate OSCAL artifacts
+        run: node scripts/generate-oscal.js evidence/
+
+      - name: Upload OSCAL artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: oscal-artifacts
+          path: |
+            evidence/oscal-assessment-results.json
+            evidence/oscal-component-definition.json
+            evidence/oscal-ssp-fragment.json
+          retention-days: 90
+
+  verify-evidence:
+    name: Evidence Verification
+    runs-on: ubuntu-latest
+    needs: [vulnerability-scan, sbom, oscal]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+
+      - name: Download SBOM
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: sbom
+          path: evidence/
+
+      - name: Download scan results
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: scan-results
+          path: evidence/
+
+      - name: Download OSCAL artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: oscal-artifacts
+          path: evidence/
+
+      - name: Verify evidence completeness (drift detection)
+        run: node scripts/verify-evidence.js evidence/
+
+      - name: Upload evidence manifest
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: evidence-manifest
+          path: evidence/evidence-manifest.json
+          retention-days: 90
