@@ -204,6 +204,9 @@ jobs:
           name: oscal-artifacts
           path: evidence/
 
+      - name: Verify evidence completeness (drift detection)
+        run: node scripts/verify-evidence.js evidence/
+
       - name: Archive evidence to S3
         run: |
           TIMESTAMP=$(date -u +%Y-%m-%dT%H-%M-%SZ)
