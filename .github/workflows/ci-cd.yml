@@ -100,15 +100,25 @@ jobs:
         run: |
           TIMESTAMP=$(date -u +%Y-%m-%dT%H-%M-%SZ)
           COMMIT=${GITHUB_SHA:0:12}
+          BUCKET="${{ secrets.S3_EVIDENCE_BUCKET || 'inventium-artifacts' }}"
+          FAILED=0
           for file in evidence/*.json; do
             BASENAME=$(basename "$file")
             SHA256=$(sha256sum "$file" | cut -d' ' -f1)
             S3KEY="cm02/evidence/${BASENAME%.json}/${TIMESTAMP}-${COMMIT}-${BASENAME}"
-            aws s3 cp "$file" "s3://${{ secrets.S3_EVIDENCE_BUCKET || 'inventium-artifacts' }}/${S3KEY}" \
+            if aws s3 cp "$file" "s3://${BUCKET}/${S3KEY}" \
               --checksum-algorithm SHA256 \
-              --metadata "sha256-digest=${SHA256},commit=${GITHUB_SHA},run-id=${GITHUB_RUN_ID},artifact-type=${BASENAME%.json}"
-            echo "Archived: s3://${{ secrets.S3_EVIDENCE_BUCKET || 'inventium-artifacts' }}/${S3KEY}"
+              --metadata "sha256-digest=${SHA256},commit=${GITHUB_SHA},run-id=${GITHUB_RUN_ID},artifact-type=${BASENAME%.json}"; then
+              echo "Archived: s3://${BUCKET}/${S3KEY}"
+            else
+              echo "{\"event\":\"s3_evidence_upload_failed\",\"severity\":\"ERROR\",\"artifact\":\"${BASENAME}\",\"bucket\":\"${BUCKET}\",\"key\":\"${S3KEY}\",\"commit\":\"${GITHUB_SHA}\",\"run_id\":\"${GITHUB_RUN_ID}\",\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" >&2
+              FAILED=1
+            fi
           done
+          if [ "$FAILED" -eq 1 ]; then
+            echo "::error::One or more evidence artifacts failed to upload to S3"
+            exit 1
+          fi
 
       - name: Deploy to Lambda
         run: |
