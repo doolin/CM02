@@ -34,18 +34,18 @@ Notes:
 ### Web form fields
 
 The form is a 10-row table (Section | NIST Text | Response) matching
-the 800-53A assessment layout. Required fields are marked with *.
+the 800-53A assessment layout. Required fields are marked with \*.
 
-- **System Name** * — name of the system being assessed
+- **System Name** \* — name of the system being assessed
 - **Control Text Response** — how the system addresses each sub-requirement
 - **Discussion Response** — what baselines cover and where they are stored
 - **Related Controls Response** — which related controls are most relevant
-- **Implementation Status** * — Implemented | Partially Implemented | Planned | Alternative | Not Applicable
-- **Organization-Defined Parameters** *
+- **Implementation Status** \* — Implemented | Partially Implemented | Planned | Alternative | Not Applicable
+- **Organization-Defined Parameters** \*
   - Frequency of baseline review/update (CM-02_ODP[01])
   - Circumstances requiring review/update (CM-02_ODP[02])
-- **Implementation Narrative** * — free-text description of how CM-02 is implemented
-- **Responsible Role** * — role accountable for the control
+- **Implementation Narrative** \* — free-text description of how CM-02 is implemented
+- **Responsible Role** \* — role accountable for the control
 - **Examine Response** — specific artifacts/evidence for the system
 - **Interview & Test Response** — interviewees and test procedures
 
@@ -54,31 +54,31 @@ the 800-53A assessment layout. Required fields are marked with *.
 The table below shows example values for a federal agency system at
 FISMA Moderate baseline.
 
-| Section                     | NIST Text                                                                                                                                                                                                                                                                                                 | Response                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CM-02_ODP[01] | the frequency of baseline configuration review and update is defined; | Annually and whenever directed by the Authorizing Official (AO). |
-| CM-02_ODP[02] | the circumstances requiring baseline configuration review and update are defined; | Security incidents, changes to federal mandates (OMB, CISA BODs, NIST updates), system architecture changes, or software/hardware end-of-life events. |
-| CM-02a.[01] | a current baseline configuration of the system is developed and documented | Baseline documented in Configuration Management Plan (CMP) v4.2, covering OS hardening (DISA STIGs), network device configs (Cisco IOS-XE), database parameters (Oracle 19c), and application middleware. |
-| CM-02a.[02] | a current baseline configuration of the system is maintained under configuration control | Baselines maintained in ServiceNow CMDB under change control; all modifications require CCB approval and are tracked with full version history. |
-| CM-02b.01 | the baseline configuration of the system is reviewed and updated \<CM-02_ODP[01] frequency\> | Annual review completed 2025-09-15 by ISSO; next scheduled review 2026-09-15. |
-| CM-02b.02 | the baseline configuration of the system is reviewed and updated when required due to \<CM-02_ODP[02] circumstances\> | Ad-hoc reviews triggered by CISA BOD 23-01 (asset visibility), RHEL 8 EOL migration to RHEL 9, and post-incident baseline revalidation following 2025-Q2 phishing event. |
-| CM-02b.03 | the baseline configuration of the system is reviewed and updated when system components are installed or upgraded | Component baselines updated at each CCB-approved install/upgrade; most recent: Oracle 19c patch set 2025-07, Cisco IOS-XE 17.12 upgrade 2025-08. |
-| Examine | \[SELECT FROM: configuration management policy; procedures addressing the baseline configuration of the system; configuration management plan; enterprise architecture documentation; system design documentation; system security plan; privacy plan; system architecture and configuration documentation; system configuration settings and associated documentation; system component inventory; change control records; other relevant documents or records\] | Configuration Management Plan (CMP) v4.2; SSP Appendix M; CMDB baseline export (ServiceNow); SCAP scan results (Nessus, weekly); CCB meeting minutes and change records; DISA STIG checklists for Windows Server 2022, RHEL 9, Oracle 19c; network device running-config backups. |
-| Interview | \[SELECT FROM: organizational personnel with configuration management responsibilities; organizational personnel with information security and privacy responsibilities; system/network administrators\] | ISSO (J. Martinez), CM Lead (R. Nguyen), Senior Network Admin (T. Brooks). |
-| Test | \[SELECT FROM: organizational processes for managing baseline configurations; mechanisms supporting configuration control of the baseline configuration\] | Execute SCAP benchmark scan against server baseline; verify CMDB accuracy against live inventory; validate CCB workflow in ServiceNow produces audit trail; confirm drift alerts trigger within 24h. |
+| Section       | NIST Text                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Response                                                                                                                                                                                                                                                                          |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CM-02_ODP[01] | the frequency of baseline configuration review and update is defined;                                                                                                                                                                                                                                                                                                                                                                                             | Annually and whenever directed by the Authorizing Official (AO).                                                                                                                                                                                                                  |
+| CM-02_ODP[02] | the circumstances requiring baseline configuration review and update are defined;                                                                                                                                                                                                                                                                                                                                                                                 | Security incidents, changes to federal mandates (OMB, CISA BODs, NIST updates), system architecture changes, or software/hardware end-of-life events.                                                                                                                             |
+| CM-02a.[01]   | a current baseline configuration of the system is developed and documented                                                                                                                                                                                                                                                                                                                                                                                        | Baseline documented in Configuration Management Plan (CMP) v4.2, covering OS hardening (DISA STIGs), network device configs (Cisco IOS-XE), database parameters (Oracle 19c), and application middleware.                                                                         |
+| CM-02a.[02]   | a current baseline configuration of the system is maintained under configuration control                                                                                                                                                                                                                                                                                                                                                                          | Baselines maintained in ServiceNow CMDB under change control; all modifications require CCB approval and are tracked with full version history.                                                                                                                                   |
+| CM-02b.01     | the baseline configuration of the system is reviewed and updated \<CM-02_ODP[01] frequency\>                                                                                                                                                                                                                                                                                                                                                                      | Annual review completed 2025-09-15 by ISSO; next scheduled review 2026-09-15.                                                                                                                                                                                                     |
+| CM-02b.02     | the baseline configuration of the system is reviewed and updated when required due to \<CM-02_ODP[02] circumstances\>                                                                                                                                                                                                                                                                                                                                             | Ad-hoc reviews triggered by CISA BOD 23-01 (asset visibility), RHEL 8 EOL migration to RHEL 9, and post-incident baseline revalidation following 2025-Q2 phishing event.                                                                                                          |
+| CM-02b.03     | the baseline configuration of the system is reviewed and updated when system components are installed or upgraded                                                                                                                                                                                                                                                                                                                                                 | Component baselines updated at each CCB-approved install/upgrade; most recent: Oracle 19c patch set 2025-07, Cisco IOS-XE 17.12 upgrade 2025-08.                                                                                                                                  |
+| Examine       | \[SELECT FROM: configuration management policy; procedures addressing the baseline configuration of the system; configuration management plan; enterprise architecture documentation; system design documentation; system security plan; privacy plan; system architecture and configuration documentation; system configuration settings and associated documentation; system component inventory; change control records; other relevant documents or records\] | Configuration Management Plan (CMP) v4.2; SSP Appendix M; CMDB baseline export (ServiceNow); SCAP scan results (Nessus, weekly); CCB meeting minutes and change records; DISA STIG checklists for Windows Server 2022, RHEL 9, Oracle 19c; network device running-config backups. |
+| Interview     | \[SELECT FROM: organizational personnel with configuration management responsibilities; organizational personnel with information security and privacy responsibilities; system/network administrators\]                                                                                                                                                                                                                                                          | ISSO (J. Martinez), CM Lead (R. Nguyen), Senior Network Admin (T. Brooks).                                                                                                                                                                                                        |
+| Test          | \[SELECT FROM: organizational processes for managing baseline configurations; mechanisms supporting configuration control of the baseline configuration\]                                                                                                                                                                                                                                                                                                         | Execute SCAP benchmark scan against server baseline; verify CMDB accuracy against live inventory; validate CCB workflow in ServiceNow produces audit trail; confirm drift alerts trigger within 24h.                                                                              |
 
 #### CM-02(02) Automation Support for Accuracy and Currency
 
-| Section | NIST Text | Response |
-| --- | --- | --- |
-| CM-02(02)_ODP | automated mechanisms for maintaining baseline configuration of the system are defined; | |
-| CM-02(02)[01] | the currency of the baseline configuration of the system is maintained using \<CM-02(02)_ODP automated mechanisms\>; | |
-| CM-02(02)[02] | the completeness of the baseline configuration of the system is maintained using \<CM-02(02)_ODP automated mechanisms\>; | |
-| CM-02(02)[03] | the accuracy of the baseline configuration of the system is maintained using \<CM-02(02)_ODP automated mechanisms\>; | |
-| CM-02(02)[04] | the availability of the baseline configuration of the system is maintained using \<CM-02(02)_ODP automated mechanisms\>. | |
-| CM-02(02)-Examine | \[SELECT FROM: configuration management policy; procedures addressing the baseline configuration of the system; configuration management plan; system design documentation; system architecture and configuration documentation; system configuration settings and associated documentation; system component inventory; configuration change control records; system security plan; other relevant documents or records\] | |
-| CM-02(02)-Interview | \[SELECT FROM: organizational personnel with configuration management responsibilities; organizational personnel with information security responsibilities; system/network administrators\] | |
-| CM-02(02)-Test | \[SELECT FROM: organizational processes for managing baseline configurations; automated mechanisms implementing baseline configuration maintenance\] | |
+| Section             | NIST Text                                                                                                                                                                                                                                                                                                                                                                                                                  | Response |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| CM-02(02)\_ODP      | automated mechanisms for maintaining baseline configuration of the system are defined;                                                                                                                                                                                                                                                                                                                                     |          |
+| CM-02(02)[01]       | the currency of the baseline configuration of the system is maintained using \<CM-02(02)\_ODP automated mechanisms\>;                                                                                                                                                                                                                                                                                                      |          |
+| CM-02(02)[02]       | the completeness of the baseline configuration of the system is maintained using \<CM-02(02)\_ODP automated mechanisms\>;                                                                                                                                                                                                                                                                                                  |          |
+| CM-02(02)[03]       | the accuracy of the baseline configuration of the system is maintained using \<CM-02(02)\_ODP automated mechanisms\>;                                                                                                                                                                                                                                                                                                      |          |
+| CM-02(02)[04]       | the availability of the baseline configuration of the system is maintained using \<CM-02(02)\_ODP automated mechanisms\>.                                                                                                                                                                                                                                                                                                  |          |
+| CM-02(02)-Examine   | \[SELECT FROM: configuration management policy; procedures addressing the baseline configuration of the system; configuration management plan; system design documentation; system architecture and configuration documentation; system configuration settings and associated documentation; system component inventory; configuration change control records; system security plan; other relevant documents or records\] |          |
+| CM-02(02)-Interview | \[SELECT FROM: organizational personnel with configuration management responsibilities; organizational personnel with information security responsibilities; system/network administrators\]                                                                                                                                                                                                                               |          |
+| CM-02(02)-Test      | \[SELECT FROM: organizational processes for managing baseline configurations; automated mechanisms implementing baseline configuration maintenance\]                                                                                                                                                                                                                                                                       |          |
 
 ### Example event payload (JSON)
 
@@ -190,7 +190,11 @@ return the URL to the caller. See `lib/s3Upload.js` for the full
 implementation.
 
 ```javascript
-const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
+const {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { randomUUID } = require("crypto");
 
@@ -198,18 +202,24 @@ const s3 = new S3Client();
 const key = `cm02/${randomUUID()}.pdf`;
 
 // 1. Write the PDF
-await s3.send(new PutObjectCommand({
-  Bucket: "inventium-artifacts",
-  Key: key,
-  Body: pdfBuffer,
-  ContentType: "application/pdf",
-}));
+await s3.send(
+  new PutObjectCommand({
+    Bucket: "inventium-artifacts",
+    Key: key,
+    Body: pdfBuffer,
+    ContentType: "application/pdf",
+  }),
+);
 
 // 2. Generate a presigned URL (30-minute expiration)
-const url = await getSignedUrl(s3, new GetObjectCommand({
-  Bucket: "inventium-artifacts",
-  Key: key,
-}), { expiresIn: 1800 });
+const url = await getSignedUrl(
+  s3,
+  new GetObjectCommand({
+    Bucket: "inventium-artifacts",
+    Key: key,
+  }),
+  { expiresIn: 1800 },
+);
 
 // 3. Return it
 return { statusCode: 200, body: JSON.stringify({ pdf_url: url }) };

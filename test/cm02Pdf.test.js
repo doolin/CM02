@@ -43,7 +43,10 @@ describe("cm02Pdf", () => {
   });
 
   test("includes all 10 assessment rows", async () => {
-    const buffer = await generatePdf({ frequency: "annually", circumstances: "incidents" });
+    const buffer = await generatePdf({
+      frequency: "annually",
+      circumstances: "incidents",
+    });
     expect(Buffer.isBuffer(buffer)).toBe(true);
     expect(buffer.length).toBeGreaterThan(2000);
   });
@@ -167,9 +170,7 @@ describe("OSCAL data extraction - statement text", () => {
     // Sub-parts of b
     expect(text).toContain("[organization-defined frequency]");
     expect(text).toContain("[organization-defined circumstances]");
-    expect(text).toContain(
-      "When system components are installed or upgraded.",
-    );
+    expect(text).toContain("When system components are installed or upgraded.");
   });
 });
 
@@ -186,9 +187,25 @@ describe("OSCAL data extraction - related controls", () => {
   test("related controls include all expected control references", () => {
     const text = buildRelatedControls();
     const expected = [
-      "AC-19", "AU-6", "CA-9", "CM-1", "CM-3", "CM-5", "CM-6", "CM-8",
-      "CM-9", "CP-9", "CP-10", "CP-12", "MA-2", "PL-8", "PM-5", "SA-8",
-      "SA-10", "SA-15", "SC-18",
+      "AC-19",
+      "AU-6",
+      "CA-9",
+      "CM-1",
+      "CM-3",
+      "CM-5",
+      "CM-6",
+      "CM-8",
+      "CM-9",
+      "CP-9",
+      "CP-10",
+      "CP-12",
+      "MA-2",
+      "PL-8",
+      "PM-5",
+      "SA-8",
+      "SA-10",
+      "SA-15",
+      "SC-18",
     ];
     for (const control of expected) {
       expect(text).toContain(control);

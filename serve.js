@@ -120,7 +120,11 @@ const server = http.createServer(async (req, res) => {
 
 function listenWithFallback(port, attempt = 1) {
   server.once("error", (err) => {
-    if (err.code === "EADDRINUSE" && !process.env.PORT && attempt < MAX_PORT_ATTEMPTS) {
+    if (
+      err.code === "EADDRINUSE" &&
+      !process.env.PORT &&
+      attempt < MAX_PORT_ATTEMPTS
+    ) {
       const nextPort = port + 1;
       console.warn(`Port ${port} is in use. Retrying on ${nextPort}...`);
       listenWithFallback(nextPort, attempt + 1);

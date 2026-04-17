@@ -66,18 +66,18 @@ with an extra rightmost **"Response"** column for user-provided values.
 
 ### Row mapping to 800-53A sections
 
-| Row | 800-53A Section             | NIST Text col                   | Response col                       |
-| --- | --------------------------- | ------------------------------- | ---------------------------------- |
-| 1   | Control Number & Title      | CM-02 Baseline Configuration    | System name *                      |
-| 2   | Control Text                | Statement with substituted ODPs | Control text response              |
-| 3   | Discussion                  | Guidance prose                  | Discussion response                |
-| 4   | Related Controls            | AC-19, AU-6, CA-9, CM-1, etc.   | Related controls response          |
-| 5   | Implementation Status       | Status options                  | Status *                           |
-| 6   | Organization-Defined Params | ODP labels                      | Frequency *, Circumstances *       |
-| 7   | Implementation Narrative    |                                 | Narrative *                        |
-| 8   | Assessment Objective        | "Determine if:" + statements    | Responsible role *                 |
-| 9   | Examine                     | [SELECT FROM: artifacts list]   | Examine response                   |
-| 10  | Interview & Test            | Interview + Test lists          | Interview/test response            |
+| Row | 800-53A Section             | NIST Text col                   | Response col                 |
+| --- | --------------------------- | ------------------------------- | ---------------------------- |
+| 1   | Control Number & Title      | CM-02 Baseline Configuration    | System name \*               |
+| 2   | Control Text                | Statement with substituted ODPs | Control text response        |
+| 3   | Discussion                  | Guidance prose                  | Discussion response          |
+| 4   | Related Controls            | AC-19, AU-6, CA-9, CM-1, etc.   | Related controls response    |
+| 5   | Implementation Status       | Status options                  | Status \*                    |
+| 6   | Organization-Defined Params | ODP labels                      | Frequency _, Circumstances _ |
+| 7   | Implementation Narrative    |                                 | Narrative \*                 |
+| 8   | Assessment Objective        | "Determine if:" + statements    | Responsible role \*          |
+| 9   | Examine                     | [SELECT FROM: artifacts list]   | Examine response             |
+| 10  | Interview & Test            | Interview + Test lists          | Interview/test response      |
 
 \* = required field
 
