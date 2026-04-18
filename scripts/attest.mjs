@@ -21,7 +21,12 @@
  *   AWS_REGION            — AWS region (default: us-east-1)
  */
 
-import { readFileSync, createWriteStream, existsSync, mkdirSync } from "node:fs";
+import {
+  readFileSync,
+  createWriteStream,
+  existsSync,
+  mkdirSync,
+} from "node:fs";
 import { createHash } from "node:crypto";
 import { execSync } from "node:child_process";
 import { resolve } from "node:path";
@@ -42,7 +47,9 @@ import PDFDocument from "pdfkit";
 // Config
 // ---------------------------------------------------------------------------
 
-const MEMO_PROGRAM_ID = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+const MEMO_PROGRAM_ID = new PublicKey(
+  "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+);
 const ZIP_FILENAME = "ci-artifacts.zip";
 const PDF_FILENAME = "attestation.pdf";
 
@@ -79,10 +86,12 @@ function buildS3Prefix(commitShort) {
 // ---------------------------------------------------------------------------
 
 async function zipArtifacts(artifactDir, outputDir) {
-  const present = ARTIFACT_FILES.filter((f) => existsSync(`${artifactDir}/${f}`));
+  const present = ARTIFACT_FILES.filter((f) =>
+    existsSync(`${artifactDir}/${f}`),
+  );
   if (present.length === 0) {
     throw new Error(
-      `No CI artifact files found in ${artifactDir}. Expected: ${ARTIFACT_FILES.join(", ")}`
+      `No CI artifact files found in ${artifactDir}. Expected: ${ARTIFACT_FILES.join(", ")}`,
     );
   }
 
@@ -120,7 +129,9 @@ function computeChecksum(filePath) {
 
 function loadKeypair(keypairPath) {
   const expanded = resolve(
-    keypairPath.startsWith("~/") ? keypairPath.replace("~", process.env.HOME) : keypairPath
+    keypairPath.startsWith("~/")
+      ? keypairPath.replace("~", process.env.HOME)
+      : keypairPath,
   );
   const bytes = JSON.parse(readFileSync(expanded, "utf8").trim());
   if (!Array.isArray(bytes) || bytes.length !== 64) {
@@ -144,7 +155,7 @@ async function submitSolanaMemo(payload, keypairPath, network) {
     connection,
     new Transaction().add(instruction),
     [keypair],
-    { commitment: "confirmed" }
+    { commitment: "confirmed" },
   );
 }
 
@@ -163,8 +174,14 @@ async function generatePdf(evidence, outputPath) {
 
     doc.fontSize(20).font("Helvetica-Bold").text("CI/CD Pipeline Attestation");
     doc.moveDown(0.5);
-    doc.fontSize(10).font("Helvetica").text(`Generated: ${evidence.completedAt}`);
-    doc.moveTo(50, doc.y + 5).lineTo(562, doc.y + 5).stroke();
+    doc
+      .fontSize(10)
+      .font("Helvetica")
+      .text(`Generated: ${evidence.completedAt}`);
+    doc
+      .moveTo(50, doc.y + 5)
+      .lineTo(562, doc.y + 5)
+      .stroke();
     doc.moveDown(1);
 
     doc.fontSize(14).font("Helvetica-Bold").text("Summary");
@@ -193,18 +210,21 @@ async function generatePdf(evidence, outputPath) {
     doc.fontSize(10).font("Helvetica");
     if (evidence.solanaTxSignature) {
       const cluster =
-        evidence.solanaNetwork === "mainnet-beta" ? "" : `?cluster=${evidence.solanaNetwork}`;
+        evidence.solanaNetwork === "mainnet-beta"
+          ? ""
+          : `?cluster=${evidence.solanaNetwork}`;
       doc.text(`Network: Solana (${evidence.solanaNetwork})`);
       doc.text("Transaction Signature:");
       doc.fontSize(8).text(`  ${evidence.solanaTxSignature}`);
       doc
         .fontSize(8)
         .text(
-          `  Verify: https://explorer.solana.com/tx/${evidence.solanaTxSignature}${cluster}`
+          `  Verify: https://explorer.solana.com/tx/${evidence.solanaTxSignature}${cluster}`,
         );
     } else {
       doc.text("No blockchain anchor recorded.");
-      if (evidence.solanaError) doc.fontSize(9).text(`  Reason: ${evidence.solanaError}`);
+      if (evidence.solanaError)
+        doc.fontSize(9).text(`  Reason: ${evidence.solanaError}`);
     }
     doc.moveDown(0.7);
 
@@ -227,7 +247,7 @@ function uploadToS3(bucket, prefix, files, region) {
   for (const f of files) {
     execSync(
       `aws s3 cp "${f.path}" "s3://${bucket}/${prefix}/${f.name}" --region "${region}"`,
-      { stdio: "inherit" }
+      { stdio: "inherit" },
     );
   }
 }
@@ -252,7 +272,9 @@ async function main() {
   const serverUrl = process.env.GITHUB_SERVER_URL || "";
   const runId = process.env.GITHUB_RUN_ID || "";
   const ciRunUrl =
-    serverUrl && runId ? `${serverUrl}/${repository}/actions/runs/${runId}` : "";
+    serverUrl && runId
+      ? `${serverUrl}/${repository}/actions/runs/${runId}`
+      : "";
 
   const steps = [];
   const step = (name, result) => {
@@ -297,7 +319,7 @@ async function main() {
           timestamp: evidence.completedAt,
         },
         keypairPath,
-        network
+        network,
       );
       evidence.solanaTxSignature = sig;
       step("Solana memo submitted", sig);
@@ -322,11 +344,14 @@ async function main() {
         bucket,
         s3Prefix,
         [
-          ...includedFiles.map((f) => ({ path: `${artifactDir}/${f}`, name: f })),
+          ...includedFiles.map((f) => ({
+            path: `${artifactDir}/${f}`,
+            name: f,
+          })),
           { path: zipPath, name: ZIP_FILENAME },
           { path: pdfPath, name: PDF_FILENAME },
         ],
-        region
+        region,
       );
       step("Uploaded to S3", `s3://${bucket}/${s3Prefix}/`);
     } catch (err) {
