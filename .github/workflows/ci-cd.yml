@@ -47,6 +47,9 @@ jobs:
       - name: Install production dependencies
         run: npm ci --omit=dev
 
+      - name: Generate version.json
+        run: echo "{\"sha\":\"$(git rev-parse HEAD)\"}" > version.json
+
       - name: Build deployment package
         run: |
           zip -r deployment.zip \
@@ -54,6 +57,7 @@ jobs:
             lib/ \
             data/cm02-control.json \
             public/ \
+            version.json \
             node_modules/ \
             -x "*.test.js" "data/NIST_SP-800-53_rev5_catalog.json"
 

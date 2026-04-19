@@ -7,6 +7,18 @@ const { checkRateLimit } = require("./lib/rateLimit");
 const { auditLog } = require("./lib/auditLog");
 
 const htmlPath = path.join(__dirname, "public", "index.html");
+const versionPath = path.join(__dirname, "version.json");
+
+function loadBuildSha() {
+  try {
+    const raw = fs.readFileSync(versionPath, "utf8");
+    return JSON.parse(raw).sha || "";
+  } catch {
+    return "";
+  }
+}
+
+const BUILD_SHA = loadBuildSha();
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -40,7 +52,9 @@ exports.handler = async (event) => {
     }
 
     if (method === "GET") {
-      const html = fs.readFileSync(htmlPath, "utf8");
+      let html = fs.readFileSync(htmlPath, "utf8");
+      const display = BUILD_SHA ? BUILD_SHA.slice(0, 7) : "dev";
+      html = html.replace("<!-- BUILD_SHA -->", display);
       return {
         statusCode: 200,
         headers: { ...CORS_HEADERS, "Content-Type": "text/html" },

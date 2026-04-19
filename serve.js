@@ -42,7 +42,8 @@ const server = http.createServer(async (req, res) => {
   };
 
   if (req.method === "GET") {
-    const html = fs.readFileSync(htmlPath, "utf8");
+    let html = fs.readFileSync(htmlPath, "utf8");
+    html = html.replace("<!-- BUILD_SHA -->", "dev");
     res.writeHead(200, { "Content-Type": "text/html" });
     return res.end(html);
   }
