@@ -75,8 +75,8 @@ jobs:
 
       - name: npm audit (dependency vulnerabilities)
         run: |
-          npm audit --audit-level=${{ inputs.npm-audit-level }} --omit=dev --json > npm-audit-results.json || true
-          npm audit --audit-level=${{ inputs.npm-audit-level }} --omit=dev || true
+          npm audit --audit-level=${{ inputs.npm-audit-level }} --omit=dev --json > npm-audit-results.json
+          npm audit --audit-level=${{ inputs.npm-audit-level }} --omit=dev
 
       - name: Trivy filesystem scan
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0

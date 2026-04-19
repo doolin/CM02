@@ -37,11 +37,14 @@ runner-injected actions (e.g. `actions/cache`).
 ## Testing
 
 ```bash
-npm test          # jest, 87 tests across 8 suites
-npm run format:check  # prettier
+npm run format:check                   # prettier
+npm test                               # jest
+npm audit --audit-level=high --omit=dev  # dependency vulnerabilities
 ```
 
-Always run tests before committing changes.
+**Every CI check that can run locally must pass before staging
+changes.** Run all of the above and confirm they are green. Do not
+stage or commit with failing checks.
 
 ## Key directories
 
