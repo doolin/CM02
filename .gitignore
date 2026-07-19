@@ -1,3 +1,6 @@
 node_modules/
 output/
 version.json
+
+# Local Claude Code settings — per-machine, not shared.
+.claude/settings.local.json
